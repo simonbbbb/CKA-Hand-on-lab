@@ -98,9 +98,7 @@ verify_storage() {
   verify "Storage" "4" "kubectl get pod pod-with-pvc -o jsonpath='{.spec.containers[0].image}{\" \"}{.spec.volumes[0].persistentVolumeClaim.claimName}'" "nginx pvc-manual" "exact"
   
   # Task 5: Implement Dynamic Volume Provisioning
-  # This is a bit more complex and depends on the environment capabilities
-  # We'll just check if they created a PVC with the default StorageClass
-  verify "Storage" "5" "kubectl get pvc -l task=dynamic-provisioning" "" "exists"
+  verify "Storage" "5" "kubectl get pvc -l task=dynamic-provisioning -o jsonpath='{.items[0].spec.storageClassName}'" "standard" "contains"
   
   show_menu
 }
@@ -108,9 +106,22 @@ verify_storage() {
 verify_workloads() {
   echo -e "\n${YELLOW}Verifying Workloads and Scheduling Tasks${NC}"
   
-  # Example tasks - replace with actual task verifications
-  verify "Workloads" "1" "kubectl get deployment custom-deployment" "" "exists"
-  verify "Workloads" "2" "kubectl get pod -l app=pod-affinity" "" "exists"
+  # Task 1: Create a Deployment with specific requirements
+  verify "Workloads" "1" "kubectl get deployment custom-deployment -o jsonpath='{.spec.replicas}{\" \"}{.spec.template.spec.containers[0].image}'" "3 nginx:latest" "exact"
+  
+  # Task 2: Configure Pod with Node Affinity
+  verify "Workloads" "2" "kubectl get pod -l app=pod-affinity -o jsonpath='{.items[0].spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key}'" "disk" "exact"
+  
+  # Task 3: Create a Horizontal Pod Autoscaler
+  verify "Workloads" "3" "kubectl get hpa -o jsonpath='{.items[0].spec.minReplicas}{\" \"}{.items[0].spec.maxReplicas}{\" \"}{.items[0].spec.targetCPUUtilizationPercentage}'" "1 10 50" "contains"
+  
+  # Task 4: Configure with ConfigMap and Secret
+  verify "Workloads" "4.1" "kubectl get configmap -o jsonpath='{.items[*].metadata.name}'" "app-config" "contains"
+  verify "Workloads" "4.2" "kubectl get secret -o jsonpath='{.items[*].metadata.name}'" "app-secrets" "contains"
+  verify "Workloads" "4.3" "kubectl get pod -l config=mounted -o jsonpath='{.items[0].spec.containers[0].env[0].valueFrom.configMapKeyRef.name}'" "app-config" "contains"
+  
+  # Task 5: Create a DaemonSet
+  verify "Workloads" "5" "kubectl get ds -o jsonpath='{.items[0].metadata.name}{\" \"}{.items[0].spec.template.spec.containers[0].image}'" "monitoring-agent fluentd:latest" "contains"
   
   show_menu
 }
@@ -118,9 +129,20 @@ verify_workloads() {
 verify_networking() {
   echo -e "\n${YELLOW}Verifying Servicing and Networking Tasks${NC}"
   
-  # Example tasks - replace with actual task verifications
-  verify "Networking" "1" "kubectl get service custom-service" "" "exists"
-  verify "Networking" "2" "kubectl get ingress custom-ingress" "" "exists"
+  # Task 1: Create ClusterIP Service
+  verify "Networking" "1" "kubectl get service custom-service -n networking-test -o jsonpath='{.spec.type}{\" \"}{.spec.selector.app}'" "ClusterIP frontend" "exact"
+  
+  # Task 2: Create NetworkPolicy
+  verify "Networking" "2" "kubectl get networkpolicy -n networking-test -o jsonpath='{.items[0].spec.podSelector.matchLabels.app}{\" \"}{.items[0].spec.ingress[0].from[0].podSelector.matchLabels.app}'" "backend frontend" "contains"
+  
+  # Task 3: Create Ingress resource
+  verify "Networking" "3" "kubectl get ingress -n networking-test -o jsonpath='{.items[0].spec.rules[0].http.paths[0].path}{\" \"}{.items[0].spec.rules[0].http.paths[0].backend.service.name}'" "/ frontend-service" "contains"
+  
+  # Task 4: Configure DNS resolution
+  verify "Networking" "4" "kubectl get pod -n networking-test -l task=dns-resolution -o jsonpath='{.items[0].spec.containers[0].env[0].name}'" "SERVICE_URL" "contains"
+  
+  # Task 5: Create NodePort service
+  verify "Networking" "5" "kubectl get service -n networking-test -o jsonpath='{.items[*].spec.type}'" "NodePort" "contains"
   
   show_menu
 }
@@ -128,9 +150,20 @@ verify_networking() {
 verify_troubleshooting() {
   echo -e "\n${YELLOW}Verifying Troubleshooting Tasks${NC}"
   
-  # Example tasks - replace with actual task verifications
-  verify "Troubleshooting" "1" "kubectl get pods -n troubleshooting broken-pod" "" "exists"
-  verify "Troubleshooting" "2" "kubectl get events --field-selector involvedObject.name=resource-constrained-pod -n troubleshooting" "" "exists"
+  # Task 1: Fix broken pod
+  verify "Troubleshooting" "1" "kubectl get pod broken-pod -n troubleshooting -o jsonpath='{.status.phase}'" "Running" "exact"
+  
+  # Task 2: Fix resource-constrained pod
+  verify "Troubleshooting" "2" "kubectl get pod resource-constrained-pod -n troubleshooting -o jsonpath='{.status.phase}'" "Running" "exact"
+  
+  # Task 3: Fix service selector issue
+  verify "Troubleshooting" "3" "kubectl get endpoints frontend-service -n troubleshooting -o jsonpath='{.subsets[0].addresses}'" "" "exists"
+  
+  # Task 4: Fix ConfigMap error
+  verify "Troubleshooting" "4" "kubectl get configmap app-config -n troubleshooting -o jsonpath='{.data.DATABASE_URL}'" "mysql://user:password@db:3306/app" "exact"
+  
+  # Task 5: Fix deployment update strategy
+  verify "Troubleshooting" "5" "kubectl get deployment web-app -n troubleshooting -o jsonpath='{.spec.strategy.type}'" "RollingUpdate" "exact"
   
   show_menu
 }
@@ -138,9 +171,51 @@ verify_troubleshooting() {
 verify_cluster_architecture() {
   echo -e "\n${YELLOW}Verifying Cluster Architecture Tasks${NC}"
   
-  # Example tasks - replace with actual task verifications
-  verify "Cluster Architecture" "1" "kubectl get role custom-role -n rbac-test" "" "exists"
-  verify "Cluster Architecture" "2" "kubectl get rolebinding custom-binding -n rbac-test" "" "exists"
+  # Task 1: Create RBAC Role
+  verify "Cluster Architecture" "1" "kubectl get role custom-role -n rbac-test -o jsonpath='{.rules[0].resources[0]}{\" \"}{.rules[0].verbs[0]}'" "pods get" "contains"
+  
+  # Task 2: Create RBAC RoleBinding
+  verify "Cluster Architecture" "2" "kubectl get rolebinding custom-binding -n rbac-test -o jsonpath='{.subjects[0].kind}{\" \"}{.subjects[0].name}{\" \"}{.roleRef.name}'" "User jane custom-role" "exact"
+  
+  # Task 3: Create a CRD
+  verify "Cluster Architecture" "3" "kubectl get crd -o jsonpath='{.items[*].metadata.name}'" "backups.cka.training" "contains"
+  
+  # Task 4: Check kubeadm config file
+  # For this task, we can check if the file exists with correct structure
+  # Since we can't directly test kubeadm in a lab, we'll check file content
+  if [ -f "/Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/kubeadm-config.yaml" ]; then
+    verify "Cluster Architecture" "4" "grep -c 'kind: ClusterConfiguration' /Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/kubeadm-config.yaml" "1" "contains"
+  else
+    echo -e "${YELLOW}Task 4: kubeadm configuration file not found in user_solutions directory${NC}"
+    echo -e "${YELLOW}Please create the file to pass this verification${NC}"
+  fi
+  
+  # Task 5: ETCD Backup procedure
+  # For this task, we can check if the file exists with correct commands
+  if [ -f "/Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/etcd-backup.md" ]; then
+    verify "Cluster Architecture" "5" "grep -c 'ETCDCTL_API=3 etcdctl' /Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/etcd-backup.md" "1" "contains"
+  else
+    echo -e "${YELLOW}Task 5: ETCD backup procedure not found in user_solutions directory${NC}"
+    echo -e "${YELLOW}Please create the file to pass this verification${NC}"
+  fi
+  
+  # Task 6: Helm Chart Installation
+  # Check if there's a values.yaml file for Helm
+  if [ -f "/Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/values.yaml" ]; then
+    verify "Cluster Architecture" "6" "grep -c 'image:' /Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/values.yaml" "1" "contains"
+  else
+    echo -e "${YELLOW}Task 6: Helm chart values file not found in user_solutions directory${NC}"
+    echo -e "${YELLOW}Please create a values.yaml file to pass this verification${NC}"
+  fi
+  
+  # Task 7: Kustomize Configuration
+  # Check if there's a kustomization.yaml file
+  if [ -d "/Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/kustomize" ]; then
+    verify "Cluster Architecture" "7" "grep -c 'kustomize' /Users/simonbalazs/CKA_LAB/05_Cluster_Architecture/user_solutions/kustomize/kustomization.yaml" "1" "contains"
+  else
+    echo -e "${YELLOW}Task 7: Kustomize directory not found in user_solutions directory${NC}"
+    echo -e "${YELLOW}Please create a kustomize directory with kustomization.yaml to pass this verification${NC}"
+  fi
   
   show_menu
 }

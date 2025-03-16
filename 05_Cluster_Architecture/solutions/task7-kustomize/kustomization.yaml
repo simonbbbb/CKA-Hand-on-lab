@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- service.yaml
+
+namePrefix: cka-
+nameSuffix: -prod
+
+commonLabels:
+  app: web-app
+  environment: production
+  
+commonAnnotations:
+  owner: cka-admin
+  
+replicas:
+- name: web-app
+  count: 3
+
+images:
+- name: nginx
+  newName: nginx
+  newTag: 1.21.0
+
+configMapGenerator:
+- name: app-config
+  literals:
+  - APP_ENV=production
+  - LOG_LEVEL=info
+
+secretGenerator:
+- name: app-secrets
+  literals:
+  - API_KEY=top-secret-value
+  
+patches:
+- path: resource-limits.yaml
+  target:
+    kind: Deployment

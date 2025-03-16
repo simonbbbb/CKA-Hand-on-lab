@@ -2,6 +2,9 @@
 
 This repository contains practice questions, hands-on tasks, and resources to help you prepare for the CKA exam. The materials are organized according to the official CKA curriculum domains and their respective weights.
 
+https://medium.com/@balazsdevops/preparing-for-the-new-cka-exam-a-hands-on-lab-environment-00b2b04c3c1f
+https://github.com/simonbbbb/CKA-Hand-on-lab
+
 ## Curriculum Domains
 
 1. **Storage (10%)**
@@ -181,6 +184,20 @@ CKA_LAB/
    - Use the `verify_solutions.sh` script to check if your solutions meet the requirements
    - The script will provide feedback on what's correct and what needs fixing
 
+### Helm and Kustomize Tasks
+
+The updated CKA exam (February 2025) includes tasks related to Helm and Kustomize for package management. In the Cluster Architecture section, you'll find:
+
+1. **Helm Tasks:**
+   - Creating and customizing Helm chart values
+   - Installing applications using Helm charts
+   - Managing releases and upgrades
+
+2. **Kustomize Tasks:**
+   - Using Kustomize to manage Kubernetes manifests
+   - Creating overlays for different environments
+   - Patching resources with Kustomize
+
 ## Troubleshooting Common Issues
 
 ### Minikube Issues on macOS Silicon
@@ -226,5 +243,16 @@ If you encounter issues with Kubernetes resources:
 - [Kubernetes Documentation](https://kubernetes.io/docs/home/)
 - [CKA Curriculum](https://github.com/cncf/curriculum)
 - [CNCF Certification Information](https://www.cncf.io/certification/cka/)
+
+## About the Author
+
+Visit my personal page projects and blog:
+
+- Personal Site: [www.siminbalazs.hu](http://www.siminbalazs.hu)
+- GitHub: [github.com/simonbbbb](https://github.com/simonbbbb)
+- LinkedIn: [linkedin.com/in/simonbalazshu](https://www.linkedin.com/in/simonbalazshu)
+- Medium: [medium.com/@balazsdevops](https://medium.com/@balazsdevops)
+
+Feel free to reach out with questions about the lab environment or Kubernetes in general!
 
 Good luck with your CKA exam preparation!
