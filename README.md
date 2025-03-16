@@ -2,8 +2,10 @@
 
 This repository contains practice questions, hands-on tasks, and resources to help you prepare for the CKA exam. The materials are organized according to the official CKA curriculum domains and their respective weights.
 
-https://medium.com/@balazsdevops/preparing-for-the-new-cka-exam-a-hands-on-lab-environment-00b2b04c3c1f
-https://github.com/simonbbbb/CKA-Hand-on-lab
+
+- [Medium Article](https://medium.com/@balazsdevops/preparing-for-the-new-cka-exam-a-hands-on-lab-environment-00b2b04c3c1f)
+- [GitHub Repository](https://github.com/simonbbbb/CKA-Hand-on-lab)
+- [CNCF CKA Curriculum](https://github.com/cncf/curriculum/blob/master/CKA_Curriculum_v1.32.pdf)
 
 ## Curriculum Domains
 
