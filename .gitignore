@@ -1,0 +1,25 @@
+# Ignore user solutions files, but not the directories or README
+*/user_solutions/*
+!*/user_solutions/README.md
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Kubernetes generated files
+kubeconfig
+*.kubeconfig
+.kube/
+
+# Minikube specific
+.minikube/
+
+# Temp files
+*.tmp
+*.log

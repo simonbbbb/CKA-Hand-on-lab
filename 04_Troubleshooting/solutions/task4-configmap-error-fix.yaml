@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: troubleshooting
+data:
+  DATABASE_URL: "mysql://user:password@db:3306/app"  # Fixed: was missing the closing quotation mark
+  APP_MODE: "production"
+  LOG_LEVEL: "info"
