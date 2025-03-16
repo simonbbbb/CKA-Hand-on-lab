@@ -1,8 +1,6 @@
 #!/bin/bash
 # CKA Lab - Solution Verification Script
 
-set -e
-
 # Colors for output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -13,6 +11,10 @@ echo "CKA Lab Solution Verification Script"
 echo "===================================="
 echo ""
 
+# Track total checks and failures
+total_checks=0
+failed_checks=0
+
 # Function to verify a solution
 verify() {
   local section=$1
@@ -22,6 +24,9 @@ verify() {
   local check_type=$5 # exact, contains, exists
   
   echo -e "${YELLOW}Verifying $section - Task $task${NC}"
+  
+  # Increment total checks
+  ((total_checks++))
   
   # Run the command and capture output
   echo "Running: $command"
@@ -36,6 +41,7 @@ verify() {
       echo -e "${RED}✗ Failed: Output doesn't match expected result${NC}"
       echo "Expected: $expected"
       echo "Got: $output"
+      ((failed_checks++))
       return 1
     fi
   elif [[ "$check_type" == "contains" ]]; then
@@ -46,6 +52,7 @@ verify() {
       echo -e "${RED}✗ Failed: Output doesn't contain expected result${NC}"
       echo "Expected to contain: $expected"
       echo "Got: $output"
+      ((failed_checks++))
       return 1
     fi
   elif [[ "$check_type" == "exists" ]]; then
@@ -55,9 +62,27 @@ verify() {
     else
       echo -e "${RED}✗ Failed: Resource doesn't exist${NC}"
       echo "Got: $output"
+      ((failed_checks++))
       return 1
     fi
   fi
+}
+
+# Function to display verification summary
+display_summary() {
+  echo -e "\n${YELLOW}Verification Summary${NC}"
+  echo -e "Total checks: $total_checks"
+  echo -e "Failed checks: $failed_checks"
+  
+  if [ $failed_checks -eq 0 ]; then
+    echo -e "${GREEN}All checks passed successfully!${NC}"
+  else
+    echo -e "${RED}Some checks failed. Review the output above for details.${NC}"
+  fi
+  
+  # Reset counters for next verification section
+  total_checks=0
+  failed_checks=0
 }
 
 # Main menu
@@ -85,6 +110,10 @@ show_menu() {
 verify_storage() {
   echo -e "\n${YELLOW}Verifying Storage Tasks${NC}"
   
+  # Reset counters for this section
+  total_checks=0
+  failed_checks=0
+  
   # Task 1: Create a StorageClass
   verify "Storage" "1" "kubectl get sc fast-storage -o jsonpath='{.provisioner}{\" \"}{.volumeBindingMode}{\" \"}{.reclaimPolicy}'" "kubernetes.io/no-provisioner WaitForFirstConsumer Delete" "exact"
   
@@ -100,11 +129,18 @@ verify_storage() {
   # Task 5: Implement Dynamic Volume Provisioning
   verify "Storage" "5" "kubectl get pvc -l task=dynamic-provisioning -o jsonpath='{.items[0].spec.storageClassName}'" "standard" "contains"
   
+  # Display summary for this section
+  display_summary
+  
   show_menu
 }
 
 verify_workloads() {
   echo -e "\n${YELLOW}Verifying Workloads and Scheduling Tasks${NC}"
+  
+  # Reset counters for this section
+  total_checks=0
+  failed_checks=0
   
   # Task 1: Create a Deployment with specific requirements
   verify "Workloads" "1" "kubectl get deployment custom-deployment -o jsonpath='{.spec.replicas}{\" \"}{.spec.template.spec.containers[0].image}'" "3 nginx:latest" "exact"
@@ -123,11 +159,18 @@ verify_workloads() {
   # Task 5: Create a DaemonSet
   verify "Workloads" "5" "kubectl get ds -o jsonpath='{.items[0].metadata.name}{\" \"}{.items[0].spec.template.spec.containers[0].image}'" "monitoring-agent fluentd:latest" "contains"
   
+  # Display summary for this section
+  display_summary
+  
   show_menu
 }
 
 verify_networking() {
   echo -e "\n${YELLOW}Verifying Servicing and Networking Tasks${NC}"
+  
+  # Reset counters for this section
+  total_checks=0
+  failed_checks=0
   
   # Task 1: Create ClusterIP Service
   verify "Networking" "1" "kubectl get service custom-service -n networking-test -o jsonpath='{.spec.type}{\" \"}{.spec.selector.app}'" "ClusterIP frontend" "exact"
@@ -144,11 +187,18 @@ verify_networking() {
   # Task 5: Create NodePort service
   verify "Networking" "5" "kubectl get service -n networking-test -o jsonpath='{.items[*].spec.type}'" "NodePort" "contains"
   
+  # Display summary for this section
+  display_summary
+  
   show_menu
 }
 
 verify_troubleshooting() {
   echo -e "\n${YELLOW}Verifying Troubleshooting Tasks${NC}"
+  
+  # Reset counters for this section
+  total_checks=0
+  failed_checks=0
   
   # Task 1: Fix broken pod
   verify "Troubleshooting" "1" "kubectl get pod broken-pod -n troubleshooting -o jsonpath='{.status.phase}'" "Running" "exact"
@@ -165,11 +215,18 @@ verify_troubleshooting() {
   # Task 5: Fix deployment update strategy
   verify "Troubleshooting" "5" "kubectl get deployment web-app -n troubleshooting -o jsonpath='{.spec.strategy.type}'" "RollingUpdate" "exact"
   
+  # Display summary for this section
+  display_summary
+  
   show_menu
 }
 
 verify_cluster_architecture() {
   echo -e "\n${YELLOW}Verifying Cluster Architecture Tasks${NC}"
+  
+  # Reset counters for this section
+  total_checks=0
+  failed_checks=0
   
   # Task 1: Create RBAC Role
   verify "Cluster Architecture" "1" "kubectl get role custom-role -n rbac-test -o jsonpath='{.rules[0].resources[0]}{\" \"}{.rules[0].verbs[0]}'" "pods get" "contains"
@@ -188,6 +245,8 @@ verify_cluster_architecture() {
   else
     echo -e "${YELLOW}Task 4: kubeadm configuration file not found in user_solutions directory${NC}"
     echo -e "${YELLOW}Please create the file to pass this verification${NC}"
+    ((failed_checks++))
+    ((total_checks++))
   fi
   
   # Task 5: ETCD Backup procedure
@@ -197,6 +256,8 @@ verify_cluster_architecture() {
   else
     echo -e "${YELLOW}Task 5: ETCD backup procedure not found in user_solutions directory${NC}"
     echo -e "${YELLOW}Please create the file to pass this verification${NC}"
+    ((failed_checks++))
+    ((total_checks++))
   fi
   
   # Task 6: Helm Chart Installation
@@ -206,6 +267,8 @@ verify_cluster_architecture() {
   else
     echo -e "${YELLOW}Task 6: Helm chart values file not found in user_solutions directory${NC}"
     echo -e "${YELLOW}Please create a values.yaml file to pass this verification${NC}"
+    ((failed_checks++))
+    ((total_checks++))
   fi
   
   # Task 7: Kustomize Configuration
@@ -215,7 +278,12 @@ verify_cluster_architecture() {
   else
     echo -e "${YELLOW}Task 7: Kustomize directory not found in user_solutions directory${NC}"
     echo -e "${YELLOW}Please create a kustomize directory with kustomization.yaml to pass this verification${NC}"
+    ((failed_checks++))
+    ((total_checks++))
   fi
+  
+  # Display summary for this section
+  display_summary
   
   show_menu
 }
