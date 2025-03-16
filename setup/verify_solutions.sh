@@ -143,21 +143,27 @@ verify_workloads() {
   failed_checks=0
   
   # Task 1: Create a Deployment with specific requirements
-  verify "Workloads" "1" "kubectl get deployment custom-deployment -o jsonpath='{.spec.replicas}{\" \"}{.spec.template.spec.containers[0].image}'" "3 nginx:latest" "exact"
+  verify "Workloads" "1" "kubectl get deployment nginx-deployment -o jsonpath='{.spec.replicas}{\" \"}{.spec.template.spec.containers[0].image}'" "3 nginx:1.14.2" "exact"
   
-  # Task 2: Configure Pod with Node Affinity
-  verify "Workloads" "2" "kubectl get pod -l app=pod-affinity -o jsonpath='{.items[0].spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key}'" "disk" "exact"
+  # Task 2: Perform a Rolling Update
+  verify "Workloads" "2" "kubectl get deployment nginx-deployment -o jsonpath='{.spec.template.spec.containers[0].image}'" "nginx:1.16.1" "exact"
   
-  # Task 3: Create a Horizontal Pod Autoscaler
-  verify "Workloads" "3" "kubectl get hpa -o jsonpath='{.items[0].spec.minReplicas}{\" \"}{.items[0].spec.maxReplicas}{\" \"}{.items[0].spec.targetCPUUtilizationPercentage}'" "1 10 50" "contains"
+  # Task 3: Roll Back a Deployment
+  verify "Workloads" "3" "kubectl get deployment nginx-deployment -o jsonpath='{.spec.template.spec.containers[0].image}'" "nginx:1.14.2" "exact"
   
   # Task 4: Configure with ConfigMap and Secret
   verify "Workloads" "4.1" "kubectl get configmap -o jsonpath='{.items[*].metadata.name}'" "app-config" "contains"
-  verify "Workloads" "4.2" "kubectl get secret -o jsonpath='{.items[*].metadata.name}'" "app-secrets" "contains"
-  verify "Workloads" "4.3" "kubectl get pod -l config=mounted -o jsonpath='{.items[0].spec.containers[0].env[0].valueFrom.configMapKeyRef.name}'" "app-config" "contains"
+  verify "Workloads" "4.2" "kubectl get secret -o jsonpath='{.items[*].metadata.name}'" "app-secret" "contains"
+  verify "Workloads" "4.3" "kubectl get pod app-pod -o jsonpath='{.spec.containers[0].env[0].valueFrom.configMapKeyRef.name}'" "app-config" "contains"
   
-  # Task 5: Create a DaemonSet
-  verify "Workloads" "5" "kubectl get ds -o jsonpath='{.items[0].metadata.name}{\" \"}{.items[0].spec.template.spec.containers[0].image}'" "monitoring-agent fluentd:latest" "contains"
+  # Task 5: Implement Horizontal Pod Autoscaling
+  verify "Workloads" "5" "kubectl get hpa -o jsonpath='{.items[0].spec.minReplicas}{\" \"}{.items[0].spec.maxReplicas}{\" \"}{.items[0].spec.targetCPUUtilizationPercentage}'" "1 10 50" "contains"
+  
+  # Task 6: Configure Pod Scheduling with Node Affinity
+  verify "Workloads" "6" "kubectl get pod -l app=pod-affinity -o jsonpath='{.items[0].spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key}'" "disk" "exact"
+  
+  # Task 7: Resource Limits and Requests
+  verify "Workloads" "7" "kubectl get pod resource-limited-pod -o jsonpath='{.spec.containers[0].resources.requests.memory}{\" \"}{.spec.containers[0].resources.requests.cpu}{\" \"}{.spec.containers[0].resources.limits.memory}{\" \"}{.spec.containers[0].resources.limits.cpu}'" "256Mi 500m 512Mi 1000m" "exact"
   
   # Display summary for this section
   display_summary
