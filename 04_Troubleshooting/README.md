@@ -25,48 +25,47 @@ This section covers diagnosing and resolving issues with Kubernetes clusters, ap
 
 ## Hands-on Tasks
 
-### Task 1: Troubleshoot a Failed Node
+### Task 1: Troubleshoot a Pod with Image Pull Error
 
-1. Identify a node that is in NotReady state
-2. Diagnose the issue (could be kubelet not running, networking issues, etc.)
-3. Resolve the issue to bring the node back to Ready state
-
-### Task 2: Debug a Failing Pod
-
-1. Deploy a pod that fails to start due to an invalid configuration
-2. Use kubectl commands to identify the problem
+1. Examine the `broken-pod` that is failing to start
+2. Identify why the image cannot be pulled
 3. Fix the issue and verify the pod starts correctly
 
-### Task 3: Troubleshoot Control Plane Components
+### Task 2: Identify and Resolve Resource Constraints
 
-1. Check the status of all control plane components
-2. Identify a non-functioning component
-3. Check logs to determine the cause
-4. Restore the component to a working state
+1. Examine the `resource-constrained-pod` 
+2. Determine if it's experiencing resource issues
+3. Adjust the resource allocation if needed
 
-### Task 4: Identify Resource Constraints
+### Task 3: Fix Pod Configuration Issues
 
-1. Deploy a resource-intensive application
-2. Use metrics tools to identify resource bottlenecks
-3. Implement appropriate resource limits
+1. Examine the `config-error-pod` with configuration problems
+2. Identify the missing ConfigMap issue
+3. Create the required ConfigMap and fix the pod
 
-### Task 5: Debug Service Connectivity Issues
+### Task 4: Debug Service Connectivity Issues
 
-1. Deploy an application with a service that isn't working
-2. Debug and fix service endpoint issues
-3. Verify traffic flows correctly
+1. Investigate why the `web-service` isn't routing traffic to the `web-deployment` pods
+2. Identify the service selector mismatch
+3. Correct the service configuration and verify connectivity
 
-### Task 6: Analyze Container Logs
+### Task 5: Resolve Deployment Update Problems
 
-1. Deploy an application that produces error logs
-2. Extract and analyze the relevant logs
-3. Identify and resolve the underlying issue
+1. Examine the `update-issue-deployment` that can't successfully roll out
+2. Identify the readiness probe issue causing the rollout to fail
+3. Fix the deployment configuration to allow successful updates
+
+### Task 6: Understand Node-level Troubleshooting
+
+1. Review the node troubleshooting guide in `solutions/node_troubleshooting.md`
+2. Understand common node failure scenarios and resolution approaches
+3. Practice the commands you would use in a real-world scenario
 
 ### Task 7: Troubleshoot DNS Resolution
 
-1. Deploy two pods: a client and a server
-2. The client can't connect to the server using DNS name
-3. Diagnose and fix the DNS resolution issue
+1. Use the `dns-client` pod to try to connect to the `dns-service`
+2. Identify why the DNS resolution or service connection is failing
+3. Fix the service selector issue and verify DNS resolution works
 
 ## Solutions
 
