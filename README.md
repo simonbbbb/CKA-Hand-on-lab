@@ -7,6 +7,8 @@ This repository contains practice questions, hands-on tasks, and resources to he
 - [GitHub Repository](https://github.com/simonbbbb/CKA-Hand-on-lab)
 - [CNCF CKA Curriculum](https://github.com/cncf/curriculum/blob/master/CKA_Curriculum_v1.32.pdf)
 
+![CKA Lab TUI Interface](img/tui.png)
+
 ## Curriculum Domains
 
 1. **Storage (10%)**
@@ -95,6 +97,23 @@ This repository contains practice questions, hands-on tasks, and resources to he
    - Manually apply the Kubernetes resources from each section
 
 ### Setting Up Lab Environments
+
+#### Option 1: Using the TUI Launcher (Recommended)
+
+The repository includes a Text-based User Interface (TUI) launcher for easy navigation and management of the lab environments:
+
+```bash
+cd setup
+./lab_launcher.sh        # Launches the interactive TUI
+```
+
+This launcher provides a menu-driven interface to:
+- Start/reset the Minikube environment
+- Set up individual lab environments for each domain
+- Check the status of resources in each namespace
+- View node status
+
+#### Option 2: Using Individual Setup Scripts
 
 The repository contains setup scripts for each domain:
 
@@ -250,7 +269,7 @@ If you encounter issues with Kubernetes resources:
 
 Visit my personal page projects and blog:
 
-- Personal Site: [www.siminbalazs.hu](http://www.siminbalazs.hu)
+- Personal Site: [www.simonbalazs.hu](http://www.simonbalazs.hu)
 - GitHub: [github.com/simonbbbb](https://github.com/simonbbbb)
 - LinkedIn: [linkedin.com/in/simonbalazshu](https://www.linkedin.com/in/simonbalazshu)
 - Medium: [medium.com/@balazsdevops](https://medium.com/@balazsdevops)

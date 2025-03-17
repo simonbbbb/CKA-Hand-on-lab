@@ -56,6 +56,27 @@ Each lab section has its own setup script in this directory:
 - `04_setup_troubleshooting_lab.sh`: Creates scenarios for troubleshooting practice
 - `05_setup_cluster_arch_lab.sh`: Prepares an environment for cluster architecture tasks
 
+### Text-based User Interface (TUI) Launcher
+
+For easier management of lab environments, we provide a TUI launcher:
+
+- `lab_launcher.sh`: Interactive menu to manage all aspects of the CKA lab environments
+
+The TUI launcher provides the following features:
+- Display current status of Minikube and available namespaces
+- Launch individual lab setup scripts
+- Reset the lab environment
+- Check resources (pods, services, deployments) in each namespace
+- View node status
+
+To use the TUI launcher:
+```bash
+chmod +x ./lab_launcher.sh  # Make executable if needed
+./lab_launcher.sh
+```
+
+### Manual Setup
+
 Run the specific setup script before working on that section's tasks:
 
 ```bash
