@@ -269,7 +269,7 @@ If you encounter issues with Kubernetes resources:
 
 Visit my personal page projects and blog:
 
-- Personal Site: [www.simonbalazs.hu](https://www.simonbalazs.hu)
+- Personal Site: [www.simonbalazs.hu](https://simonbalazs.hu)
 - GitHub: [github.com/simonbbbb](https://github.com/simonbbbb)
 - LinkedIn: [linkedin.com/in/simonbalazshu](https://www.linkedin.com/in/simonbalazshu)
 - Medium: [medium.com/@balazsdevops](https://medium.com/@balazsdevops)
