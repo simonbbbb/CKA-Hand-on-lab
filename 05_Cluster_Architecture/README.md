@@ -30,51 +30,49 @@ This section covers setting up, configuring, and maintaining Kubernetes clusters
 
 ## Hands-on Tasks
 
-### Task 1: Set Up RBAC
+### Task 1: Create RBAC Role
 
-1. Create a new namespace called `development`
-2. Create a role that allows creating and viewing pods and deployments in the `development` namespace
-3. Create a service account called `dev-user`
-4. Bind the role to the service account
-5. Verify the access by impersonating the service account
+1. Create a custom role named `custom-role` in the `rbac-test` namespace
+2. Configure the role to allow `get` permissions on pods
+3. Verify your role configuration with: `kubectl get role custom-role -n rbac-test -o yaml`
 
-### Task 2: Install a Kubernetes Cluster using kubeadm
+### Task 2: Configure RBAC RoleBinding
 
-1. Prepare three nodes for a Kubernetes cluster
-2. Install a container runtime (containerd)
-3. Initialize the control plane on the first node
-4. Configure networking with a CNI plugin
-5. Join worker nodes to the cluster
-6. Verify cluster functionality
+1. Create a RoleBinding named `custom-binding` in the `rbac-test` namespace
+2. Bind the `custom-role` you created in Task 1 to a User named `jane`
+3. Verify the binding with: `kubectl get rolebinding custom-binding -n rbac-test -o yaml`
 
-### Task 3: Configure a Highly Available Control Plane
+### Task 3: Create a Custom Resource Definition (CRD)
 
-1. Set up a load balancer for the API server
-2. Configure additional control plane nodes
-3. Ensure etcd is properly configured for high availability
-4. Test failover scenarios
+1. Create a Custom Resource Definition (CRD) named `backups.cka.training`
+2. Define its schema to include fields for storage type and backup frequency
+3. Verify your CRD with: `kubectl get crd backups.cka.training`
 
-### Task 4: Use Helm and Kustomize
+### Task 4: Create a kubeadm Configuration File
 
-1. Install Helm
-2. Deploy an application using a Helm chart
-3. Create a basic Kustomize configuration for an application
-4. Apply different overlays for different environments
+1. Create a file named `kubeadm-config.yaml` in the user_solutions directory
+2. Configure it for a ClusterConfiguration that would initialize a Kubernetes control plane
+3. Include settings for API server, networking, and etcd configuration
 
-### Task 5: Work with CRDs and Operators
+### Task 5: Document ETCD Backup Procedure
 
-1. Create a simple CustomResourceDefinition
-2. Create instances of your custom resource
-3. Install an operator (e.g., Prometheus Operator)
-4. Use the operator to deploy and manage an application
+1. Create a file named `etcd-backup.md` in the user_solutions directory
+2. Document the steps to backup etcd using etcdctl
+3. Include the proper ETCDCTL_API version setting and command parameters
+4. Specify necessary certificate paths and other required flags
 
-### Task 6: Manage Cluster Lifecycle
+### Task 6: Prepare Helm Chart Installation
 
-1. Upgrade a Kubernetes cluster from one minor version to the next
-2. Back up etcd data
-3. Restore etcd from backup
-4. Add a new node to the cluster
-5. Safely drain and remove a node from the cluster
+1. Create a values.yaml file in the user_solutions directory for a Helm chart
+2. Configure it with custom image settings and other deployment parameters
+3. The file should include at least an image specification
+
+### Task 7: Create Kustomize Configuration
+
+1. Create a directory named `kustomize` in the user_solutions directory
+2. Inside that directory, create a kustomization.yaml file
+3. Configure it to customize a basic deployment by adding labels, namespace, or other settings
+4. Ensure it contains the "kustomize" reference for validation
 
 ## Solutions
 

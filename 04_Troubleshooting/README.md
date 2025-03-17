@@ -25,47 +25,41 @@ This section covers diagnosing and resolving issues with Kubernetes clusters, ap
 
 ## Hands-on Tasks
 
-### Task 1: Troubleshoot a Pod with Image Pull Error
+### Task 1: Fix Pod with Image Pull Error
 
-1. Examine the `broken-pod` that is failing to start
-2. Identify why the image cannot be pulled
-3. Fix the issue and verify the pod starts correctly
+1. Examine the `broken-pod` in the troubleshooting namespace
+2. Identify why the image cannot be pulled (nonexistent version tag)
+3. Fix the issue by updating to a valid image version (e.g., nginx:latest)
+4. Verify the pod is now in the Running state with: `kubectl get pod broken-pod -n troubleshooting -o jsonpath='{.status.phase}'`
 
-### Task 2: Identify and Resolve Resource Constraints
+### Task 2: Fix Resource-Constrained Pod
 
-1. Examine the `resource-constrained-pod` 
-2. Determine if it's experiencing resource issues
-3. Adjust the resource allocation if needed
+1. Examine the `resource-constrained-pod` in the troubleshooting namespace 
+2. Determine why it's having issues (limited memory/CPU resources)
+3. Modify its resource allocation to appropriate values
+4. Verify the pod is now in the Running state with: `kubectl get pod resource-constrained-pod -n troubleshooting -o jsonpath='{.status.phase}'`
 
-### Task 3: Fix Pod Configuration Issues
-
-1. Examine the `config-error-pod` with configuration problems
-2. Identify the missing ConfigMap issue
-3. Create the required ConfigMap and fix the pod
-
-### Task 4: Debug Service Connectivity Issues
+### Task 3: Fix Service Connectivity Issues
 
 1. Investigate why the `web-service` isn't routing traffic to the `web-deployment` pods
-2. Identify the service selector mismatch
-3. Correct the service configuration and verify connectivity
+2. Identify the service selector mismatch issue
+3. Correct the frontend-service selector to properly match the pod labels
+4. Verify endpoints exist with: `kubectl get endpoints frontend-service -n troubleshooting`
 
-### Task 5: Resolve Deployment Update Problems
+### Task 4: Fix ConfigMap Error
 
-1. Examine the `update-issue-deployment` that can't successfully roll out
-2. Identify the readiness probe issue causing the rollout to fail
-3. Fix the deployment configuration to allow successful updates
+1. Examine the `config-error-pod` with configuration problems
+2. Identify the missing ConfigMap issue (nonexistent-config)
+3. Create the required ConfigMap named `app-config` with a DATABASE_URL key
+4. Set the DATABASE_URL value to: "mysql://user:password@db:3306/app"
+5. Verify with: `kubectl get configmap app-config -n troubleshooting -o jsonpath='{.data.DATABASE_URL}'`
 
-### Task 6: Understand Node-level Troubleshooting
+### Task 5: Fix Deployment Update Strategy
 
-1. Review the node troubleshooting guide in `solutions/node_troubleshooting.md`
-2. Understand common node failure scenarios and resolution approaches
-3. Practice the commands you would use in a real-world scenario
-
-### Task 7: Troubleshoot DNS Resolution
-
-1. Use the `dns-client` pod to try to connect to the `dns-service`
-2. Identify why the DNS resolution or service connection is failing
-3. Fix the service selector issue and verify DNS resolution works
+1. Examine the deployment named `web-app` in the troubleshooting namespace
+2. Identify issues with its update strategy
+3. Modify the deployment to use a RollingUpdate strategy
+4. Verify with: `kubectl get deployment web-app -n troubleshooting -o jsonpath='{.spec.strategy.type}'`
 
 ## Solutions
 

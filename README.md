@@ -32,21 +32,22 @@ This repository contains practice questions, hands-on tasks, and resources to he
    - Understand and use CoreDNS
 
 4. **Troubleshooting (30%)**
-   - Troubleshoot clusters and nodes
-   - Troubleshoot cluster components
-   - Monitor cluster and application resource usage
-   - Manage and evaluate container output streams
-   - Troubleshoot services and networking
+   - Fix pod with image pull errors
+   - Resolve resource constraint issues
+   - Fix service connectivity problems
+   - Resolve ConfigMap-related errors
+   - Fix deployment update strategies
+   - Troubleshoot node-level issues
+   - Resolve DNS resolution problems
 
 5. **Cluster Architecture, Installation and Configuration (25%)**
-   - Manage role-based access control (RBAC)
-   - Prepare underlying infrastructure for installing a Kubernetes cluster
-   - Create and manage Kubernetes clusters using kubeadm
-   - Manage the lifecycle of Kubernetes clusters
-   - Implement and configure a highly-available control plane
-   - Use Helm and Kustomize to install cluster components
-   - Understand extension interfaces (CNI, CSI, CRI, etc.)
-   - Understand CRDs, install and configure operators
+   - Create and manage RBAC roles
+   - Configure RBAC role bindings
+   - Create Custom Resource Definitions (CRDs)
+   - Prepare kubeadm configuration files
+   - Document and perform etcd backup procedures
+   - Work with Helm charts
+   - Create Kustomize configurations
 
 ## Setup Instructions
 
