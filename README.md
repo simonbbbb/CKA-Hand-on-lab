@@ -27,9 +27,9 @@
 ║ |  $$$$$$/| $$ \  $$| $$  | $$                                    ║
 ║  \______/ |__/  \__/|__/  |__/                                    ║
 ║                                                                   ║
-║                 CKA Exam Simulator                                ║
+║                 Exam Simulator                                    ║
 ║                    by simonbbbb                                   ║
-║         Hands-On Lab  ·  Exam Simulator  ·  v2.0                  ║
+║         Hands-On Lab  ·   v2.0                                    ║
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
