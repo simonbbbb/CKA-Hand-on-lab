@@ -1,0 +1,42 @@
+id: wrk-001
+domain: workloads-scheduling
+title: Create a Deployment with Rolling Update Strategy
+description: |
+  Create a deployment with the following specifications:
+
+  - **Name:** `nginx-deployment`
+  - **Replicas:** 3
+  - **Image:** `nginx:1.14.2`
+  - **Label selector:** `app=nginx`
+  - **Rolling update strategy:**
+    - `maxUnavailable`: 1
+    - `maxSurge`: 1
+
+  Verify the deployment and its pods:
+
+  ```
+  kubectl get deployment nginx-deployment
+  kubectl get pods -l app=nginx
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - deployment
+  - rolling-update
+  - replicas
+hints:
+  - "Use apiVersion: apps/v1 and kind: Deployment. The rolling update strategy is configured under spec.strategy.rollingUpdate."
+  - "Set spec.strategy.type: RollingUpdate and under rollingUpdate, set maxSurge: 1 and maxUnavailable: 1. The pod template must have matching labels to the selector."
+  - "A quick approach: kubectl create deployment nginx-deployment --image=nginx:1.14.2 --replicas=3 --dry-run=client -o yaml > deploy.yaml, then add the strategy section manually."
+exam_tips:
+  - "Use kubectl create deployment --dry-run=client -o yaml to scaffold YAML fast. It saves significant time on the exam."
+  - "Remember that the selector.matchLabels must match template.metadata.labels exactly, or the deployment will fail."
+  - "The default strategy is already RollingUpdate with maxSurge=25% and maxUnavailable=25%. You only need to override when specific values are requested."
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get deployment nginx-deployment -o jsonpath='{.spec.replicas} {.spec.template.spec.containers[0].image}'"
+verify_expected: "3 nginx:1.14.2"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task1-deployment.yaml
+prerequisites: []

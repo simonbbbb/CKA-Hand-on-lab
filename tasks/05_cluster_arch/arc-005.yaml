@@ -1,0 +1,48 @@
+id: arc-005
+domain: cluster-architecture
+title: Document ETCD Backup and Restore Procedure
+description: |
+  Create a document describing how to backup and restore etcd in a Kubernetes
+  cluster.
+
+  **Requirements:**
+  1. Create a file named `etcd-backup.md` documenting the complete procedure:
+     - How to identify the etcd pod and endpoint
+     - The backup command using `etcdctl` with `ETCDCTL_API=3`
+     - Required certificate flags (`--cacert`, `--cert`, `--key`)
+     - The `snapshot save` command
+     - The restore procedure including:
+       - Stopping the API server
+       - Restoring from a snapshot with proper flags
+       - Updating the etcd data directory in the static pod manifest
+       - Restarting services
+     - Verification steps
+
+  2. The document should include:
+     - Common certificate paths: `/etc/kubernetes/pki/etcd/ca.crt`,
+       `/etc/kubernetes/pki/etcd/server.crt`, `/etc/kubernetes/pki/etcd/server.key`
+     - The backup output path: `/opt/etcd-backup.db`
+     - Important notes about testing and storing backups
+difficulty: hard
+time_estimate: 15min
+weight: 8
+tags:
+  - etcd
+  - backup
+  - restore
+  - disaster-recovery
+hints:
+  - ETCD backups use `ETCDCTL_API=3 etcdctl snapshot save`. You must specify `--endpoints`, `--cacert`, `--cert`, and `--key` flags.
+  - The restore command is `etcdctl snapshot restore <file> --data-dir=<new-dir>`. Additional flags include `--name`, `--initial-cluster`, `--initial-cluster-token`, and `--initial-advertise-peer-urls`.
+  - After restoring, update the etcd static pod manifest at `/etc/kubernetes/manifests/etcd.yaml` to point the volume to the new data directory, then restart kubelet.
+exam_tips:
+  - ETCD backup/restore is a high-value exam topic. Memorize the `etcdctl snapshot save` and `etcdctl snapshot restore` commands with all required flags.
+  - Always set `ETCDCTL_API=3` before running etcdctl commands. Without it, the v2 API is used which does not support snapshots.
+  - On the exam, you may be given the etcd pod name and certificate paths. Use `kubectl -n kube-system describe pod etcd-<node>` to find them.
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: ""
+verify_expected: ""
+solution_files:
+  - 05_Cluster_Architecture/solutions/task5-etcd-backup.md
+prerequisites: []

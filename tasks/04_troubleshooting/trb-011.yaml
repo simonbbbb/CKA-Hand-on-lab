@@ -1,0 +1,59 @@
+id: trb-011
+domain: troubleshooting
+title: "CSI Volume Mount Failure - Fix StorageClass Provisioning"
+description: |
+  A stateful application pod named 'db-app' in the 'data' namespace fails to start
+  because its PersistentVolumeClaim cannot be mounted. The PVC is stuck in Pending
+  status. The candidate must diagnose the storage provisioning failure and fix the
+  StorageClass so the PVC binds and the pod starts.
+
+  Starting state:
+  - Pod 'db-app' exists in namespace 'data' and is in Pending state.
+  - PVC 'db-pvc' exists in namespace 'data' and is stuck in Pending status.
+  - A StorageClass named 'local-storage' exists but has an incorrect provisioner
+    field set to 'kubernetes.io/no-provisioner' instead of a working provisioner.
+  - No PV has been manually created that matches the PVC request.
+
+  The candidate must:
+  1. Check pod status: kubectl get pod db-app -n data.
+  2. Describe the pod and look at events: kubectl describe pod db-app -n data.
+  3. Check PVC status: kubectl get pvc -n data.
+  4. Describe the PVC: kubectl describe pvc db-pvc -n data.
+  5. Identify that the PVC is waiting for a provisioner to create a PV.
+  6. Check available StorageClasses: kubectl get storageclass.
+  7. Inspect the 'local-storage' StorageClass: kubectl get storageclass local-storage -o yaml.
+  8. Identify the wrong provisioner value.
+  9. Fix the StorageClass by changing the provisioner to a working one (e.g.,
+     'pd.csi.storage.gke.io' for GKE, 'kubernetes.io/aws-ebs' for AWS, or create
+     a manual PV that satisfies the PVC).
+  10. After fixing, verify PVC binds: kubectl get pvc db-pvc -n data.
+  11. Verify pod starts: kubectl get pod db-app -n data.
+
+  Verification command:
+    kubectl get pvc db-pvc -n data -o jsonpath='{.status.phase}'
+  Expected result: "Bound"
+difficulty: medium
+time_estimate: 8
+weight: 30
+tags:
+  - troubleshooting
+  - storage
+  - pvc
+  - pv
+  - storageclass
+  - csi
+  - provisioning
+hints:
+  - "Start with 'kubectl describe pod db-app -n data' and read the Events section. It will show why the pod can't mount its volume -- typically 'PersistentVolumeClaim is not bound' or 'volume not found'."
+  - "Check the PVC with 'kubectl describe pvc db-pvc -n data'. Look for events indicating why provisioning is failing. Then check the StorageClass it references with 'kubectl get storageclass <name> -o yaml'."
+  - "The 'kubernetes.io/no-provisioner' provisioner means dynamic provisioning is disabled -- someone must manually create a PV. Either fix the provisioner to one that supports dynamic provisioning, or create a matching PV manually."
+exam_tips:
+  - "Storage troubleshooting follows a clear chain: Pod -> PVC -> StorageClass -> PV -> Provisioner. Walk the chain to find the break."
+  - "In the exam, you may need to create a PV manually if dynamic provisioning isn't available. Remember the PV spec: capacity, accessModes, hostPath or nfs path, and a matching reclaimPolicy."
+  - "Use 'kubectl get events -n <namespace> --sort-by=.metadata.creationTimestamp' to see recent events in chronological order. This is often the fastest way to understand what went wrong."
+  - "If you fix the StorageClass and the PVC is still Pending, you may need to delete and recreate the PVC so it re-attempts provisioning with the corrected class."
+solution_files:
+  - trb-011-storage-fix.yaml
+  - trb-011-pod-fix.yaml
+verify_command: "kubectl get pvc csi-pvc -n troubleshooting -o jsonpath='{.status.phase}'"
+verify_expected: "Bound"

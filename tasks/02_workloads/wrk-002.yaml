@@ -1,0 +1,38 @@
+id: wrk-002
+domain: workloads-scheduling
+title: Perform a Rolling Update
+description: |
+  Update the deployment created in wrk-001 to use the image `nginx:1.16.1`
+  and observe the rolling update process.
+
+  1. Update the deployment image from `nginx:1.14.2` to `nginx:1.16.1`
+  2. Watch the rollout status until it completes
+  3. Verify the pods are running the new image version
+
+  ```
+  kubectl rollout status deployment/nginx-deployment
+  kubectl get pods -l app=nginx -o jsonpath='{.items[*].spec.containers[0].image}'
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 4
+tags:
+  - deployment
+  - rolling-update
+  - image-update
+hints:
+  - "Use kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 to update the image imperatively."
+  - "Watch the rollout with kubectl rollout status deployment/nginx-deployment. You can also use kubectl get pods -l app=nginx -w to see pods being replaced."
+  - "Verify the rollout history with kubectl rollout history deployment/nginx-deployment to confirm the revision was created."
+exam_tips:
+  - "kubectl set image is the fastest way to update an image during the exam. Memorize the syntax: kubectl set image deployment/<name> <container>=<new-image>."
+  - "Use kubectl rollout status to monitor progress. Add --timeout=120s to avoid waiting forever if something goes wrong."
+  - "You can also edit live with kubectl edit deployment nginx-deployment, but set image is safer and faster."
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get deployment nginx-deployment -o jsonpath='{.spec.template.spec.containers[0].image}'"
+verify_expected: "nginx:1.16.1"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task2-rolling-update.yaml
+prerequisites:
+  - wrk-001

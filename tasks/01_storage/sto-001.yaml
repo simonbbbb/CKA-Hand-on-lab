@@ -1,0 +1,38 @@
+id: sto-001
+domain: storage
+title: Create a StorageClass
+description: |
+  Create a StorageClass named `fast-storage` with the following specifications:
+
+  - **Provisioner:** `kubernetes.io/no-provisioner`
+  - **Volume Binding Mode:** `WaitForFirstConsumer`
+  - **Reclaim Policy:** `Delete`
+
+  The StorageClass should be created in the default namespace. Verify your
+  configuration by running:
+
+  ```
+  kubectl get storageclass fast-storage -o yaml
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 4
+tags:
+  - storageclass
+  - storage
+  - provisioning
+hints:
+  - "StorageClass resources live in the storage.k8s.io/v1 API group. Use kubectl explain storageclass to explore the available fields."
+  - "You need to set provisioner, volumeBindingMode, and reclaimPolicy in the spec. The reclaimPolicy is a top-level field under spec, not nested."
+  - "The full YAML starts with apiVersion: storage.k8s.io/v1 and kind: StorageClass. Set metadata.name to fast-storage, provisioner to kubernetes.io/no-provisioner, volumeBindingMode to WaitForFirstConsumer, and reclaimPolicy to Delete."
+exam_tips:
+  - "Use kubectl create or imperative commands when possible to save time on the exam."
+  - "You can generate a StorageClass skeleton with kubectl create storageclass fast-storage --help or use kubectl apply -f with a quick YAML."
+  - "Remember that WaitForFirstConsumer delays volume binding until a pod using the PVC is created."
+setup_script: 01_setup_storage_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get sc fast-storage -o jsonpath='{.provisioner} {.volumeBindingMode} {.reclaimPolicy}'"
+verify_expected: "kubernetes.io/no-provisioner WaitForFirstConsumer Delete"
+solution_files:
+  - 01_Storage/solutions/task1-storage-class.yaml
+prerequisites: []

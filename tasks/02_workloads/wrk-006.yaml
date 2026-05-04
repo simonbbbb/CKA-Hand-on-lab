@@ -1,0 +1,54 @@
+id: wrk-006
+domain: workloads-scheduling
+title: Configure Pod Scheduling with Node Affinity and Taints
+description: |
+  Complete the following scheduling tasks:
+
+  **Part A -- Node Affinity:**
+  1. Label a node with `disk=ssd`:
+
+     ```
+     kubectl label node <node-name> disk=ssd
+     ```
+
+  2. Create a pod named `nginx-pod-affinity` with image `nginx:latest` that uses
+     `requiredDuringSchedulingIgnoredDuringExecution` node affinity to ensure
+     it is scheduled on a node with the label `disk=ssd`.
+
+  **Part B -- Taints and Tolerations:**
+  3. Taint a node with `app=critical:NoSchedule`:
+
+     ```
+     kubectl taint node <node-name> app=critical:NoSchedule
+     ```
+
+  4. Create a pod that tolerates this taint and can be scheduled on the tainted node.
+
+  Verify:
+  ```
+  kubectl get pod nginx-pod-affinity -o wide
+  kubectl describe node <node-name> | grep -A5 Taints
+  ```
+difficulty: medium
+time_estimate: 10min
+weight: 8
+tags:
+  - node-affinity
+  - taints
+  - tolerations
+  - scheduling
+hints:
+  - "For node affinity, use spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms with a matchExpressions entry using key: disk, operator: In, values: [ssd]."
+  - "For taints, use kubectl taint node <node> app=critical:NoSchedule. To tolerate it, add spec.tolerations with key: app, operator: Equal, effect: NoSchedule, and value: critical."
+  - "You can find node names with kubectl get nodes. On Minikube there is typically one node named minikube."
+exam_tips:
+  - "requiredDuringSchedulingIgnoredDuringExecution means the pod MUST be placed on a matching node, but if labels change later, the pod stays. preferred is a soft constraint."
+  - "Taints repel pods; tolerations allow pods to be scheduled on tainted nodes. This is how Kubernetes keeps system pods on control-plane nodes."
+  - "Use kubectl describe node <name> to check existing labels and taints. Use kubectl label and kubectl taint for imperative changes."
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pod -l app=pod-affinity -o jsonpath='{.items[0].spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key}'"
+verify_expected: "disk"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task6-pod-affinity.yaml
+prerequisites: []

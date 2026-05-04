@@ -1,0 +1,34 @@
+id: "net-008"
+domain: "services-networking"
+title: "Create a Gateway and HTTPRoute for path-based routing"
+difficulty: "medium"
+time_estimate: "6min"
+weight: 8
+tags: ["gateway-api", "gateway", "http-route", "path-routing"]
+hints:
+  - "A Gateway references a GatewayClass and defines one or more listeners (port, protocol, hostname)."
+  - "An HTTPRoute binds to a Gateway via parentRefs and defines rules with backendRefs pointing to Services."
+  - "Use pathType: PathPrefix for matching path prefixes like /app1 and /app2."
+exam_tips:
+  - "Gateway + HTTPRoute replaces the old Ingress pattern - know both for the exam"
+  - "The HTTPRoute's parentRefs must match the Gateway's name and namespace"
+  - "Each HTTPRouteRule can have multiple backendRefs for traffic splitting (weighted backends)"
+setup_script: "net-008-setup.sh"
+verify_script: "net-008-verify.sh"
+verify_command: "kubectl get gateway -n networking -o jsonpath='{.items[*].metadata.name}'"
+verify_expected: "."
+solution_files: ["net-008-gateway.yaml", "net-008-http-route.yaml"]
+description: |
+  Create a Gateway and HTTPRoute in the `networking` namespace for path-based routing.
+
+  **Gateway requirements:**
+  - Name: `app-gateway`
+  - Use the GatewayClass `nginx-gateway-class` (already exists in the cluster)
+  - One listener on port 80, protocol HTTP, named `http`
+  - Allow routes from the same namespace
+
+  **HTTPRoute requirements:**
+  - Name: `app-routing`
+  - Bind to the Gateway `app-gateway` in the same namespace
+  - Route path `/app1` (prefix match) to Service `app1-svc` on port 80
+  - Route path `/app2` (prefix match) to Service `app2-svc` on port 80

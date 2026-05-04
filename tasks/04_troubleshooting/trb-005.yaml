@@ -1,0 +1,21 @@
+id: "trb-005"
+domain: "troubleshooting"
+title: "Fix a Deployment with Incorrect Update Strategy"
+description: |
+  The deployment web-app in namespace troubleshooting has an incorrect update strategy causing
+  issues. Change it to RollingUpdate strategy with maxSurge: 1 and maxUnavailable: 0.
+  Verify with kubectl get deployment.
+difficulty: "medium"
+time_estimate: "5min"
+weight: 7
+tags: ["deployment", "rolling-update", "strategy"]
+hints:
+  - "kubectl get deployment -o yaml to see current strategy."
+  - "Use kubectl edit or patch to fix the update strategy."
+  - "Set strategy.type to RollingUpdate with maxSurge: 1 and maxUnavailable: 0."
+exam_tips:
+  - "Know RollingUpdate vs Recreate strategies and their parameters."
+solution_files:
+  - "04_troubleshooting/task5-deployment-update-fix.yaml"
+verify_command: "kubectl get deployment web-app -n troubleshooting -o jsonpath='{.spec.strategy.type}'"
+verify_expected: "RollingUpdate"

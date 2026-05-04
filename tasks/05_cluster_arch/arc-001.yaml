@@ -1,0 +1,41 @@
+id: arc-001
+domain: cluster-architecture
+title: Create RBAC Role
+description: |
+  Create RBAC resources to control access in the cluster:
+
+  1. Create a namespace named `development`
+  2. Create a ServiceAccount named `dev-user` in the `development` namespace
+  3. Create a Role named `dev-role` in the `development` namespace with the
+     following permissions:
+     - **Core API group:** get, watch, list, create, delete on pods
+     - **Apps API group:** get, watch, list, create, delete on deployments
+
+  Verify:
+  ```
+  kubectl get role dev-role -n development -o yaml
+  kubectl describe role dev-role -n development
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - rbac
+  - role
+  - serviceaccount
+  - namespace
+hints:
+  - "Use kubectl create namespace development and kubectl create serviceaccount dev-user -n development to create the namespace and ServiceAccount imperatively."
+  - "The Role resource uses apiVersion: rbac.authorization.k8s.io/v1 and kind: Role. Each rule needs apiGroups, resources, and verbs."
+  - "For the core API group (pods), use apiGroups: [\"\"] (empty string). For deployments, use apiGroups: [\"apps\"]. Set the verbs array for each rule."
+exam_tips:
+  - "Roles are namespace-scoped; ClusterRoles are cluster-scoped. Use Roles for namespace-specific permissions."
+  - "Use kubectl create role imperatively: kubectl create role dev-role --verb=get,watch,list,create,delete --resource=pods -n development."
+  - "The empty string \"\" for apiGroups refers to the core Kubernetes API (pods, services, configmaps, secrets, etc.)."
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get role dev-role -n development -o jsonpath='{.rules[0].resources[0]} {.rules[0].verbs[0]}'"
+verify_expected: "pods get"
+solution_files:
+  - 05_Cluster_Architecture/solutions/task1-rbac.yaml
+prerequisites: []

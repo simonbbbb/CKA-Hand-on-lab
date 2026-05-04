@@ -1,0 +1,46 @@
+id: "net-009"
+domain: "services-networking"
+title: "Configure Gateway API with TLS termination and HTTP-to-HTTPS redirect"
+difficulty: "hard"
+time_estimate: "8min"
+weight: 10
+tags: ["gateway-api", "gateway", "http-route", "tls", "https-redirect", "path-routing"]
+hints:
+  - "A Gateway can have multiple listeners. Create one for HTTP (port 80) and one for HTTPS (port 443) with a TLS certificate reference."
+  - "For TLS termination, set the listener protocol to HTTPS and provide a tls.certificateRefs pointing to a Secret of type kubernetes.io/tls."
+  - "To redirect HTTP to HTTPS, use an HTTPRoute with a filter of type RequestRedirect and set scheme to HTTPS on the route attached to the HTTP listener."
+exam_tips:
+  - "The TLS Secret must be of type kubernetes.io/tls and contain tls.crt and tls.tls.key - same as Ingress TLS"
+  - "HTTP-to-HTTPS redirect is done via HTTPRoute filters, not annotations (unlike Ingress)"
+  - "A single HTTPRoute can attach to multiple parent Gateways/listeners"
+  - "The redirect filter uses requestRedirect with scheme: HTTPS - port defaults to 443"
+setup_script: "net-009-setup.sh"
+verify_script: "net-009-verify.sh"
+verify_command: "kubectl get gateway -n networking -o jsonpath='{.items[0].spec.listeners[0].tls.mode}'"
+verify_expected: "Terminate"
+solution_files: ["net-009-gateway.yaml", "net-009-http-route.yaml", "net-009-tls-secret.yaml"]
+description: |
+  Configure a Gateway API setup with TLS termination, path-based routing, and HTTP-to-HTTPS redirect in the `networking` namespace.
+
+  **Step 1: TLS Secret**
+  - Name: `app-tls-secret`
+  - Type: `kubernetes.io/tls`
+  - Use any valid TLS certificate and key (self-signed is fine for the exam)
+
+  **Step 2: Gateway**
+  - Name: `secure-gateway`
+  - Use GatewayClass `nginx-gateway-class` (already exists)
+  - Listener 1: name `http`, port 80, protocol HTTP, allow routes from Same namespace
+  - Listener 2: name `https`, port 443, protocol HTTPS, TLS mode Terminate, reference the Secret `app-tls-secret`, allow routes from Same namespace
+
+  **Step 3: HTTPRoute for redirect**
+  - Name: `secure-redirect`
+  - Attach to the `http` listener of `secure-gateway`
+  - Match path `/secure` (prefix match)
+  - Redirect to HTTPS (use a RequestRedirect filter with scheme HTTPS)
+
+  **Step 4: HTTPRoute for backend routing**
+  - Name: `backend-routing`
+  - Attach to the `https` listener of `secure-gateway`
+  - Route path `/api` (prefix match) to Service `api-service` on port 8080
+  - Route path `/web` (prefix match) to Service `web-service` on port 80

@@ -1,0 +1,53 @@
+id: net-010
+domain: "Services & Networking"
+title: "Default-Deny All Ingress Traffic"
+description: |
+  Create a default-deny NetworkPolicy in the `secure-app` namespace that blocks all
+  ingress traffic to every pod in that namespace.
+
+  Requirements:
+  1. Create the namespace `secure-app` if it does not already exist.
+  2. Create a NetworkPolicy named `default-deny-ingress` in that namespace.
+  3. The policy must apply to ALL pods in the namespace (empty podSelector).
+  4. The only policyType should be Ingress — do not restrict egress.
+  5. No ingress rules should be defined, effectively denying all incoming traffic.
+
+  This is a common security best-practice: start by denying everything, then add
+  allow rules on top.
+
+  Verification:
+    kubectl get networkpolicy default-deny-ingress -n secure-app -o yaml
+    # Deploy a test pod and confirm it cannot be reached from another namespace.
+difficulty: easy
+time_estimate: 3
+weight: 2
+tags:
+  - networkpolicy
+  - security
+  - ingress
+  - default-deny
+hints:
+  - hint: "Use an empty podSelector ({}) to select all pods in the namespace."
+    level: 1
+  - hint: "The policyTypes field should contain only 'Ingress'. Do not add any ingress rules."
+    level: 2
+  - hint: |
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: default-deny-ingress
+        namespace: secure-app
+      spec:
+        podSelector: {}
+        policyTypes:
+        - Ingress
+    level: 3
+exam_tips: |
+  - Default-deny NetworkPolicy is one of the most frequently tested networking tasks.
+  - Remember: an empty podSelector {} means ALL pods in the namespace, not zero pods.
+  - Only include the policyTypes you actually want to restrict (Ingress, Egress, or both).
+  - Some CNI plugins (like flannel in some modes) do not enforce NetworkPolicies — know your CNI.
+verify_command: "kubectl get networkpolicy -n networking default-deny-ingress -o jsonpath='{.spec.podSelector.matchLabels}'"
+verify_expected: "{}"
+solution_files:
+  - solutions/03_networking/net-010-default-deny.yaml

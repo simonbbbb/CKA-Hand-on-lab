@@ -1,0 +1,44 @@
+id: arc-002
+domain: cluster-architecture
+title: Configure RBAC RoleBinding
+description: |
+  Create a RoleBinding that connects the Role and ServiceAccount from arc-001
+  to grant permissions.
+
+  1. Create a RoleBinding named `dev-role-binding` in the `development` namespace
+  2. Bind the `dev-role` (from arc-001) to the ServiceAccount `dev-user`
+     in the `development` namespace
+  3. Verify the binding is correct:
+
+  ```
+  kubectl get rolebinding dev-role-binding -n development -o yaml
+  ```
+
+  Also verify the permissions are effective:
+  ```
+  kubectl auth can-i get pods --as=system:serviceaccount:development:dev-user -n development
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - rbac
+  - rolebinding
+  - serviceaccount
+  - permissions
+hints:
+  - "A RoleBinding uses apiVersion: rbac.authorization.k8s.io/v1 and kind: RoleBinding. It needs subjects (who gets access) and roleRef (what permissions)."
+  - "The subjects array specifies the ServiceAccount: kind: ServiceAccount, name: dev-user, namespace: development."
+  - "The roleRef specifies the Role: kind: Role, name: dev-role, apiGroup: rbac.authorization.k8s.io. Note that roleRef is immutable after creation."
+exam_tips:
+  - "Use kubectl create rolebinding imperatively: kubectl create rolebinding dev-role-binding --role=dev-role --serviceaccount=development:dev-user -n development."
+  - "Test permissions with kubectl auth can-i <verb> <resource> --as=system:serviceaccount:<ns>:<sa> -n <ns>. This is essential for verifying RBAC during the exam."
+  - "RoleBindings grant permissions within a namespace. ClusterRoleBindings grant cluster-wide permissions."
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get rolebinding developer-binding -n development -o jsonpath='{.subjects[0].kind} {.subjects[0].name}'"
+verify_expected: "User"
+solution_files:
+  - 05_Cluster_Architecture/solutions/task2-rbac-rolebinding.yaml
+prerequisites:
+  - arc-001

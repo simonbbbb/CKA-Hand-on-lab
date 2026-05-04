@@ -1,0 +1,56 @@
+id: net-011
+domain: "Services & Networking"
+title: "Allow Specific Cross-Namespace Pod Communication"
+description: |
+  Create a NetworkPolicy that allows only pods with the label `app=api` in the
+  `backend` namespace to communicate with pods labeled `app=database` in the
+  `data` namespace on TCP port 5432.
+
+  Requirements:
+  1. Create namespaces `backend` and `data` if they do not already exist.
+  2. In the `data` namespace, create a NetworkPolicy named `allow-api-to-database`.
+  3. The policy must select pods with label `app=database`.
+  4. Ingress is allowed ONLY from pods with label `app=api` in namespace `backend`.
+  5. Traffic is allowed ONLY on TCP port 5432.
+  6. No other ingress or egress rules should be present.
+
+  Verification:
+    kubectl get networkpolicy allow-api-to-database -n data -o yaml
+    # Test with a pod in the backend namespace (app=api) — should connect.
+    # Test with a pod in any other namespace — should be blocked.
+difficulty: medium
+time_estimate: 5
+weight: 4
+tags:
+  - networkpolicy
+  - cross-namespace
+  - ingress
+  - database
+hints:
+  - hint: "Use both namespaceSelector and podSelector in the 'from' clause to match cross-namespace traffic."
+    level: 1
+  - hint: "The namespaceSelector needs matchLabels with kubernetes.io/metadata.name: backend to target the backend namespace."
+    level: 2
+  - hint: |
+      The ingress rule should look like:
+      ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: backend
+          podSelector:
+            matchLabels:
+              app: api
+        ports:
+        - protocol: TCP
+          port: 5432
+    level: 3
+exam_tips: |
+  - Cross-namespace NetworkPolicy requires namespaceSelector AND podSelector in the SAME 'from' item.
+  - If you put them in separate items, they become an OR condition (either matches).
+  - Use the built-in label kubernetes.io/metadata.name to match namespace names.
+  - Always double-check port and protocol (TCP vs UDP) in the exam.
+verify_command: "kubectl get networkpolicy -n networking allow-cross-namespace -o jsonpath='{.spec.ingress[0].from[0].namespaceSelector.matchLabels}'"
+verify_expected: "."
+solution_files:
+  - solutions/03_networking/net-011-database-netpol.yaml

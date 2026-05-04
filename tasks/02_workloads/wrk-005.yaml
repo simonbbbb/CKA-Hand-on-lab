@@ -1,0 +1,43 @@
+id: wrk-005
+domain: workloads-scheduling
+title: Implement Horizontal Pod Autoscaling
+description: |
+  Set up a Horizontal Pod Autoscaler (HPA) for a deployment:
+
+  1. First, create a deployment named `php-apache` with image `registry.k8s.io/hpa-example`
+     (or use an existing nginx deployment if that image is unavailable).
+
+  2. Create a Horizontal Pod Autoscaler with the following specifications:
+     - **Scale target:** `php-apache` deployment
+     - **Min replicas:** 1
+     - **Max replicas:** 10
+     - **Target CPU utilization:** 50%
+
+  3. Verify the HPA is configured:
+
+  ```
+  kubectl get hpa
+  kubectl describe hpa php-apache-autoscaler
+  ```
+difficulty: medium
+time_estimate: 8min
+weight: 6
+tags:
+  - hpa
+  - autoscaling
+  - cpu-utilization
+hints:
+  - "The HPA resource uses apiVersion: autoscaling/v1 (or autoscaling/v2 for more metrics). Set scaleTargetRef to reference the deployment."
+  - "Use kubectl autoscale deployment php-apache --min=1 --max=10 --cpu-percent=50 for the imperative approach. This creates an HPA named php-apache automatically."
+  - "If writing YAML, the scaleTargetRef needs apiVersion: apps/v1, kind: Deployment, and name: php-apache. Set minReplicas, maxReplicas, and targetCPUUtilizationPercentage."
+exam_tips:
+  - "The imperative command kubectl autoscale deployment <name> --min=N --max=N --cpu-percent=N is the fastest way to create an HPA during the exam."
+  - "HPA requires the metrics-server to be running in the cluster for CPU-based scaling. On Minikube, enable it with minikube addons enable metrics-server."
+  - "The targetCPUUtilizationPercentage in autoscaling/v1 refers to the percentage of the requested CPU, not the node total CPU."
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get hpa -o jsonpath='{.items[0].spec.minReplicas} {.items[0].spec.maxReplicas} {.items[0].spec.targetCPUUtilizationPercentage}'"
+verify_expected: "1 10 50"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task5-horizontal-pod-autoscaler.yaml
+prerequisites: []

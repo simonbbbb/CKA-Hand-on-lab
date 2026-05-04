@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dns-client
+  labels:
+    app: dns-client
+spec:
+  containers:
+  - name: client
+    image: busybox
+    command:
+    - sleep
+    - "3600"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dns-server
+  labels:
+    app: dns-server
+spec:
+  containers:
+  - name: server
+    image: nginx
+    ports:
+    - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dns-server-svc
+spec:
+  selector:
+    app: dns-server
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# The following is a troubleshooting example for DNS issues
+# Common DNS issues and resolutions:
+# 1. Check if kube-dns/CoreDNS is running
+# 2. Check DNS configuration in kubelet
+# 3. Verify DNS service IP is correct
+# 4. Test DNS resolution from client pod:
+#    kubectl exec -it dns-client -- nslookup dns-server-svc
+#    kubectl exec -it dns-client -- nslookup dns-server-svc.default.svc.cluster.local
+# 5. Check /etc/resolv.conf in the client pod
+#    kubectl exec -it dns-client -- cat /etc/resolv.conf

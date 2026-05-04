@@ -1,0 +1,44 @@
+id: wrk-007
+domain: workloads-scheduling
+title: Resource Limits and Requests
+description: |
+  Create a Pod with the following resource requirements:
+
+  - **Name:** `resource-limited-pod`
+  - **Image:** `nginx`
+  - **Label:** `app=resource-demo`
+  - **Resource Requests:**
+    - Memory: 256Mi
+    - CPU: 500m (0.5 CPU)
+  - **Resource Limits:**
+    - Memory: 512Mi
+    - CPU: 1000m (1 CPU)
+
+  Verify the pod is running and has the correct resource configuration:
+
+  ```
+  kubectl get pod resource-limited-pod -o yaml | grep -A10 resources
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 4
+tags:
+  - resources
+  - limits
+  - requests
+  - qos
+hints:
+  - "Resource requests and limits are set under spec.containers[].resources. Requests are what the container is guaranteed; limits are the maximum it can use."
+  - "Use resources.requests.memory: 256Mi, resources.requests.cpu: 500m, resources.limits.memory: 512Mi, and resources.limits.cpu: 1000m."
+  - "CPU is measured in cores: 500m = 0.5 cores, 1000m = 1 core. Memory uses Mi (mebibytes) or Gi (gibibytes)."
+exam_tips:
+  - "Pods with both requests and limits set get a QoS class of Guaranteed (when requests == limits) or Burstable (when limits > requests). Know these classes."
+  - "If a container exceeds its memory limit, it will be OOMKilled. If it exceeds CPU limit, it is throttled but not killed."
+  - "Use kubectl run with --requests and --limits flags for the fastest imperative approach."
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pod resource-limited-pod -o jsonpath='{.spec.containers[0].resources.requests.memory} {.spec.containers[0].resources.requests.cpu} {.spec.containers[0].resources.limits.memory} {.spec.containers[0].resources.limits.cpu}'"
+verify_expected: "256Mi 500m 512Mi 1000m"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task7-resource-limits.yaml
+prerequisites: []

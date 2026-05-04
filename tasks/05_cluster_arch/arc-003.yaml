@@ -1,0 +1,46 @@
+id: arc-003
+domain: cluster-architecture
+title: Create a Custom Resource Definition (CRD)
+description: |
+  Create a Custom Resource Definition (CRD) that extends Kubernetes with a
+  new resource type for managing backups.
+
+  **Specifications:**
+  - **CRD Name:** `backups.cka.training`
+  - **Group:** `cka.training`
+  - **Version:** `v1` (served: true, storage: true)
+  - **Scope:** Namespaced
+  - **Kind:** `Backup`
+  - **Short name:** `bkp`
+  - **Schema fields:**
+    - `spec.source` (string)
+    - `spec.destination` (string)
+    - `spec.schedule` (string)
+
+  Verify:
+  ```
+  kubectl get crd backups.cka.training
+  kubectl api-resources | grep backup
+  ```
+difficulty: medium
+time_estimate: 10min
+weight: 7
+tags:
+  - crd
+  - custom-resource
+  - api-extension
+hints:
+  - "CRDs use apiVersion: apiextensions.k8s.io/v1 and kind: CustomResourceDefinition. The metadata name must be <plural>.<group>."
+  - "Define spec.group: cka.training, spec.scope: Namespaced, and spec.names with plural: backups, singular: backup, kind: Backup, shortNames: [bkp]."
+  - "The schema is defined under spec.versions[0].schema.openAPIV3Schema. Define spec as an object with source, destination, and schedule as string properties."
+exam_tips:
+  - "The CRD metadata name must follow the format <plural-resource-name>.<API-group>. If these do not match, the CRD will be rejected."
+  - "At least one version must have storage: true. This is the version stored in etcd."
+  - "After creating a CRD, you can immediately create custom resources of that type using kubectl apply -f."
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get crd -o jsonpath='{.items[*].metadata.name}'"
+verify_expected: "."
+solution_files:
+  - 05_Cluster_Architecture/solutions/task3-custom-resource-definition.yaml
+prerequisites: []

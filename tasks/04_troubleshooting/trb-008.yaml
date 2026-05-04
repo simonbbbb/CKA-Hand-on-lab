@@ -1,0 +1,54 @@
+id: trb-008
+domain: troubleshooting
+title: "Control Plane Component Failure - Fix the kube-apiserver Static Pod"
+description: |
+  The kube-apiserver on the control plane node has stopped responding. You are unable
+  to run most kubectl commands against the cluster. The candidate must SSH into the
+  control plane node, investigate the static pod manifests, identify the misconfiguration
+  in the kube-apiserver manifest, and restore API server functionality.
+
+  Starting state:
+  - The kube-apiserver static pod is not running on the control plane node.
+  - The file /etc/kubernetes/manifests/kube-apiserver.yaml contains a deliberate
+    misconfiguration: the etcd server URL is set to http://192.168.99.50:2379 instead
+    of the correct https://127.0.0.1:2379.
+  - All other control plane components (scheduler, controller-manager, etcd) are healthy.
+
+  The candidate must:
+  1. SSH into the control plane node (ssh controlplane or use the provided terminal).
+  2. Check which static pods are running: crictl ps or docker ps.
+  3. Inspect the kube-apiserver logs: crictl logs <container-id> or
+     journalctl -u kubelet | grep apiserver.
+  4. Examine the static pod manifest at /etc/kubernetes/manifests/kube-apiserver.yaml.
+  5. Identify the wrong etcd server URL in the --etcd-servers flag.
+  6. Correct the URL to https://127.0.0.1:2379.
+  7. Wait for the kubelet to detect the change and restart the API server pod.
+  8. Verify the API server is running: kubectl get nodes.
+
+  Verification command:
+    kubectl get nodes
+  Expected result: The control plane node should show status Ready.
+difficulty: hard
+time_estimate: 12
+weight: 30
+tags:
+  - troubleshooting
+  - control-plane
+  - static-pods
+  - kube-apiserver
+  - etcd
+  - cluster-admin
+hints:
+  - "Static pods are managed by the kubelet and defined in YAML files under /etc/kubernetes/manifests/. When the kubelet detects a change to a manifest file, it automatically restarts the pod."
+  - "Look at the command line flags in the kube-apiserver.yaml manifest. Focus on the --etcd-servers flag and verify it points to the correct etcd endpoint with the correct protocol (https vs http)."
+  - "After fixing the manifest, you don't need to manually restart anything. The kubelet watches the manifests directory and will recreate the pod automatically. Use 'crictl ps' or 'kubectl get pods -n kube-system' to confirm the API server is back."
+exam_tips:
+  - "In the CKA exam, you may have SSH access to nodes. Use 'ssh <nodename>' as specified in the question. Always check /etc/kubernetes/manifests/ for static pod issues."
+  - "When troubleshooting control plane failures, always check the kubelet first since it manages static pods: 'systemctl status kubelet' and 'journalctl -u kubelet'."
+  - "Common static pod misconfigurations in the exam include: wrong etcd URLs, incorrect certificate paths, wrong bind addresses, and missing volume mounts. Read the entire manifest carefully."
+  - "Remember: you cannot use kubectl if the API server is down. Use crictl, journalctl, and direct file inspection on the node instead."
+solution_files:
+  - trb-008-apiserver-fix.yaml
+  - trb-008-steps.md
+verify_command: "kubectl get pod -n kube-system -l component=kube-apiserver -o jsonpath='{.items[0].status.phase}'"
+verify_expected: "Running"

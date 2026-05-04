@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-constrained-pod
+  namespace: troubleshooting
+spec:
+  containers:
+  - name: memory-hog
+    image: nginx:latest
+    resources:
+      limits:
+        memory: "256Mi"  # Fixed: increased from too restrictive 50Mi
+        cpu: "500m"
+      requests:
+        memory: "128Mi"  # Fixed: increased to allow container to start properly
+        cpu: "200m"

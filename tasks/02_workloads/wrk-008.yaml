@@ -1,0 +1,70 @@
+id: wrk-008
+domain: "Workloads & Scheduling"
+title: "Horizontal Pod Autoscaler with Scale-Up Stabilization"
+description: |
+  Create a Deployment named `api-server` and then configure a Horizontal Pod Autoscaler
+  (HPA) for it with scale-up stabilization.
+
+  Part 1 — Deployment:
+  1. Create a Deployment named `api-server` in the `default` namespace.
+  2. Use image `nginx:1.25` with 2 replicas.
+  3. Set container port 80.
+  4. Set resource requests: cpu 100m, memory 128Mi.
+  5. Set resource limits: cpu 500m, memory 256Mi.
+
+  Part 2 — HPA:
+  1. Create an HPA named `api-server-hpa` targeting the `api-server` deployment.
+  2. Minimum replicas: 2, maximum replicas: 10.
+  3. Target CPU utilization: 50%.
+  4. Configure a scale-up stabilization window of 60 seconds (behavior.scaleUp.stabilizationWindowSeconds).
+
+  Verification:
+    kubectl get deployment api-server
+    kubectl get hpa api-server-hpa
+    kubectl get hpa api-server-hpa -o yaml | grep stabilizationWindowSeconds
+difficulty: medium
+time_estimate: 6
+weight: 4
+tags:
+  - hpa
+  - autoscaling
+  - deployment
+  - resource-limits
+hints:
+  - hint: "Use autoscaling/v2 API for HPA — it supports the behavior field for stabilization."
+    level: 1
+  - hint: "The behavior.scaleUp.stabilizationWindowSeconds field controls how long HPA waits before scaling up again."
+    level: 2
+  - hint: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      spec:
+        scaleTargetRef:
+          apiVersion: apps/v1
+          kind: Deployment
+          name: api-server
+        minReplicas: 2
+        maxReplicas: 10
+        metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 50
+        behavior:
+          scaleUp:
+            stabilizationWindowSeconds: 60
+    level: 3
+exam_tips: |
+  - HPA requires resource requests on the pod — without them, HPA cannot calculate utilization.
+  - autoscaling/v2 is the current API (autoscaling/v2beta2 was removed in v1.26+).
+  - The behavior field is often tested: know stabilizationWindowSeconds, policies, and selectPolicy.
+  - You can create both manifests in one file using --- separator.
+  - kubectl autoscale deployment api-server --min=2 --max=10 --cpu-percent=50 creates a basic HPA,
+    but cannot set behavior — you need a YAML manifest for that.
+verify_command: "kubectl get hpa -l task=hpa-stabilization -o jsonpath='{.items[0].spec.maxReplicas}'"
+verify_expected: "10"
+solution_files:
+  - solutions/02_workloads/wrk-008-deployment.yaml
+  - solutions/02_workloads/wrk-008-hpa.yaml

@@ -1,0 +1,75 @@
+id: arc-009
+domain: "Cluster Architecture, Installation & Configuration"
+title: "Troubleshoot Pod Security Standards Violation"
+description: |
+  A pod named `privileged-app` in namespace `secure-ns` fails to create because of
+  Pod Security Standards enforcement. You need to diagnose and fix the issue.
+
+  Setup context:
+  The namespace `secure-ns` has the following PSS labels already applied:
+    pod-security.kubernetes.io/enforce: restricted
+
+  The pod `privileged-app` uses the following disallowed settings:
+    - Runs as root (no securityContext)
+    - Uses a privileged container
+    - Does not drop any capabilities
+
+  Your tasks:
+  1. Check why the pod is blocked by examining the namespace PSS labels and the error:
+       kubectl describe namespace secure-ns
+       kubectl get events -n secure-ns
+  2. Fix the pod spec to comply with the "restricted" profile:
+     - Set runAsNonRoot: true
+     - Set runAsUser to a non-zero UID (e.g., 1000)
+     - Set allowPrivilegeEscalation: false
+     - Drop ALL capabilities with drop: ["ALL"]
+     - Set seccompProfile to RuntimeDefault
+  3. Alternatively, you may update the namespace to use the "baseline" profile
+     instead (less restrictive), which would allow the pod to run.
+  4. Verify the pod starts successfully after your fix.
+
+  Verification:
+    kubectl get pod privileged-app -n secure-ns -o wide
+    kubectl get pod privileged-app -n secure-ns -o yaml | grep -A10 securityContext
+difficulty: medium
+time_estimate: 7
+weight: 5
+tags:
+  - pod-security
+  - pss
+  - troubleshooting
+  - security-context
+  - restricted-profile
+hints:
+  - hint: "Use kubectl get events -n secure-ns to see why the pod was rejected."
+    level: 1
+  - hint: "The 'restricted' profile requires: runAsNonRoot, drop ALL capabilities, seccompProfile (RuntimeDefault or Localhost), and no privilege escalation."
+    level: 2
+  - hint: |
+      Fix the pod spec by adding a securityContext:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          seccompProfile:
+            type: RuntimeDefault
+        containers:
+        - name: privileged-app
+          image: nginx
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+    level: 3
+exam_tips: |
+  - "restricted" profile requires ALL of: runAsNonRoot, drop ALL caps, seccompProfile, no privilege escalation.
+  - "baseline" profile only restricts: host namespaces, privileged containers, hostPath mounts, and some capabilities.
+  - You can check violations with: kubectl get events -n <ns> --sort-by='.lastTimestamp'
+  - Two valid solution paths: fix the pod spec OR relax the namespace profile. The exam may accept either.
+  - kubectl explain pod.spec.securityContext and kubectl explain pod.spec.containers.securityContext help during the exam.
+solution_files:
+  - solutions/05_cluster_arch/arc-009-pod-fix.yaml
+  - solutions/05_cluster_arch/arc-009-ns-fix.yaml
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pod -n secure-ns -o jsonpath='{.items[0].status.phase}'"
+verify_expected: "Running"

@@ -1,0 +1,46 @@
+id: arc-004
+domain: cluster-architecture
+title: Create a kubeadm Configuration File
+description: |
+  Create a kubeadm configuration file for initializing a Kubernetes control
+  plane node.
+
+  **Specifications:**
+  1. Create a file named `kubeadm-config.yaml` containing:
+     - A `ClusterConfiguration` section with:
+       - Kubernetes version: `v1.25.0`
+       - Control plane endpoint: `control-plane.example.com:6443`
+       - Pod subnet: `192.168.0.0/16`
+       - Service subnet: `10.96.0.0/12`
+       - API server extra args for admission plugins and audit logging
+       - etcd data directory: `/var/lib/etcd`
+     - An `InitConfiguration` section with:
+       - Advertise address: `192.168.1.101`
+       - Bind port: `6443`
+       - Node name: `master-1`
+       - Control-plane taint
+
+  2. Verify the file exists and is valid YAML.
+difficulty: hard
+time_estimate: 12min
+weight: 8
+tags:
+  - kubeadm
+  - cluster-init
+  - control-plane
+  - configuration
+hints:
+  - "Use apiVersion: kubeadm.k8s.io/v1beta3 for both ClusterConfiguration and InitConfiguration. Separate them with ---."
+  - "The ClusterConfiguration sets cluster-wide settings (networking, etcd, API server args). The InitConfiguration sets node-specific bootstrapping (advertise address, node name, taints)."
+  - "API server extra args go in apiServer.extraArgs. etcd config is under etcd.local.dataDir. The node registration taint goes in nodeRegistration.taints."
+exam_tips:
+  - "Know the difference between InitConfiguration (first node only) and ClusterConfiguration (applies to the whole cluster)."
+  - "kubeadm init --config kubeadm-config.yaml reads all configuration types from a single file separated by ---."
+  - "The controlPlaneEndpoint should be a load-balanced address in HA setups. For a single control plane, it can be the node IP."
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: ""
+verify_expected: ""
+solution_files:
+  - 05_Cluster_Architecture/solutions/task4-kubeadm-config.yaml
+prerequisites: []

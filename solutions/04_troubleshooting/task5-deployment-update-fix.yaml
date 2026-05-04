@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: troubleshooting
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-app
+  strategy:
+    type: RollingUpdate  # Fixed: was Recreate which wasn't allowing zero downtime updates
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: web-app
+        image: nginx:1.19  # Fixed: was using incompatible image version
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "200m"

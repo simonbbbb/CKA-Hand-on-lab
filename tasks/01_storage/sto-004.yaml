@@ -1,0 +1,42 @@
+id: sto-004
+domain: storage
+title: Create a Pod that Uses a PVC
+description: |
+  Create a Pod that uses the PVC created in sto-003:
+
+  - **Name:** `pod-with-pvc`
+  - **Image:** `nginx`
+  - **Mount the PVC at:** `/usr/share/nginx/html`
+
+  The pod should reference the PVC `pvc-manual` as a volume and mount it to
+  the container at the specified path.
+
+  Verify the pod is running and the volume is mounted:
+
+  ```
+  kubectl get pod pod-with-pvc
+  kubectl describe pod pod-with-pvc | grep -A5 Mount
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - pod
+  - persistentvolumeclaim
+  - volume-mount
+hints:
+  - "In the Pod spec, define a volumes entry with persistentVolumeClaim.claimName: pvc-manual, then reference it in the container volumeMounts."
+  - "The volume name is arbitrary (e.g., storage-volume). In volumeMounts, set mountPath: /usr/share/nginx/html and name matching the volume name."
+  - "The full structure: spec.volumes[0].persistentVolumeClaim.claimName: pvc-manual and spec.containers[0].volumeMounts[0].mountPath: /usr/share/nginx/html."
+exam_tips:
+  - "This is a common exam pattern: creating a pod that mounts a PVC. Practice this until it is second nature."
+  - "You can use kubectl run pod-with-pvc --image=nginx --dry-run=client -o yaml > pod.yaml as a starting point, then add the volume and volumeMount sections."
+  - "Always verify with kubectl describe pod to confirm the mount is present and the PVC is bound."
+setup_script: 01_setup_storage_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pod pod-with-pvc -o jsonpath='{.spec.containers[0].image} {.spec.volumes[0].persistentVolumeClaim.claimName}'"
+verify_expected: "nginx pvc-manual"
+solution_files:
+  - 01_Storage/solutions/task4-pod-with-pvc.yaml
+prerequisites:
+  - sto-003

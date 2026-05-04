@@ -1,0 +1,20 @@
+id: "trb-001"
+domain: "troubleshooting"
+title: "Fix a Pod with Image Pull Error"
+description: |
+  Examine the broken-pod in namespace troubleshooting. It uses a nonexistent image tag.
+  Fix it by updating to nginx:latest. Verify with kubectl get pod broken-pod -n troubleshooting.
+difficulty: "easy"
+time_estimate: "4min"
+weight: 5
+tags: ["pod", "image", "troubleshooting"]
+hints:
+  - "Use kubectl describe pod to see the error details."
+  - "The image tag is wrong — look for ImagePullBackOff or ErrImagePull status."
+  - "Use kubectl edit or kubectl set image to correct the image tag."
+exam_tips:
+  - "ImagePullBackOff/ErrImagePull are common exam questions. Always check describe first."
+solution_files:
+  - "04_troubleshooting/task1-broken-pod-fix.yaml"
+verify_command: "kubectl get pod broken-pod -n troubleshooting -o jsonpath='{.status.phase}'"
+verify_expected: "Running"

@@ -1,0 +1,25 @@
+---
+# Solution B: Relax the namespace to "baseline" profile instead
+# This allows the pod to run without changing its spec,
+# but is less secure.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secure-ns
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+# The original pod (no security context) would now be allowed under "baseline",
+# which only blocks: hostPID, hostIPC, hostNetwork, privileged, hostPath, hostPort,
+# and certain capabilities. A simple nginx pod without securityContext passes baseline.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged-app
+  namespace: secure-ns
+spec:
+  containers:
+  - name: privileged-app
+    image: nginx:1.25

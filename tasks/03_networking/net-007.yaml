@@ -1,0 +1,27 @@
+id: "net-007"
+domain: "services-networking"
+title: "Create a GatewayClass"
+difficulty: "easy"
+time_estimate: "4min"
+weight: 5
+tags: ["gateway-api", "gateway-class"]
+hints:
+  - "GatewayClass is a cluster-scoped resource. Use `kubectl explain gatewayclass` to see the spec."
+  - "The spec.controllerName field identifies the controller that will manage Gateways of this class."
+  - "Use `kubectl explain gatewayclass.spec.parametersRef` to see how to reference the ConfigMap."
+exam_tips:
+  - "Gateway API is new in CKA v1.35 - expect 3-5 questions on it"
+  - "GatewayClass is like StorageClass but for gateways - it defines which controller implements the Gateway"
+  - "You need the Gateway API CRDs installed in your cluster before creating GatewayClass resources"
+setup_script: "net-007-setup.sh"
+verify_script: "net-007-verify.sh"
+verify_command: "kubectl get gatewayclass -o jsonpath='{.items[*].metadata.name}'"
+verify_expected: "."
+solution_files: ["net-007-gateway-class.yaml"]
+description: |
+  Create a GatewayClass named `nginx-gateway-class` in the `networking` namespace.
+
+  Requirements:
+  - Controller name: `nginx.org/gateway-controller`
+  - Parameters should reference a ConfigMap named `nginx-gw-config` in the `networking` namespace
+  - The GatewayClass should be allowed to reference Gateways from any namespace

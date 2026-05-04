@@ -2,6 +2,11 @@
 */user_solutions/*
 !*/user_solutions/README.md
 
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
 # OS specific files
 .DS_Store
 Thumbs.db
@@ -23,3 +28,6 @@ kubeconfig
 # Temp files
 *.tmp
 *.log
+
+# Progress data
+.cka-progress.json

@@ -1,0 +1,51 @@
+id: arc-007
+domain: cluster-architecture
+title: Create Kustomize Configuration
+description: |
+  Create a Kustomize configuration that customizes a base deployment.
+
+  **Specifications:**
+  1. Create a directory named `kustomize` containing:
+
+  2. A `kustomization.yaml` file with:
+     - **Resources:** deployment.yaml and service.yaml (base manifests)
+     - **Name prefix:** `cka-`
+     - **Name suffix:** `-prod`
+     - **Common labels:** app: web-app, environment: production
+     - **Common annotations:** owner: cka-admin
+     - **Replica override:** 3 replicas for the web-app deployment
+     - **Image override:** nginx to nginx:1.21.0
+     - **ConfigMap generator:** app-config with literals APP_ENV=production and LOG_LEVEL=info
+     - **Secret generator:** app-secrets with literal API_KEY=top-secret-value
+     - **Patches:** apply resource-limits.yaml patch targeting Deployments
+
+  3. Ensure the `kustomization.yaml` file is valid and contains the
+     string "kustomize" for validation.
+
+  Verify:
+  ```
+  kubectl kustomize ./kustomize/
+  ```
+difficulty: medium
+time_estimate: 12min
+weight: 7
+tags:
+  - kustomize
+  - configuration
+  - overlays
+  - generators
+hints:
+  - "Kustomization uses apiVersion: kustomize.config.k8s.io/v1beta1 and kind: Kustomization. The resources field lists base YAML files."
+  - "Use namePrefix, nameSuffix, commonLabels, and commonAnnotations for global modifications. replicas overrides replica count by resource name."
+  - "configMapGenerator and secretGenerator create ConfigMaps and Secrets from literals, files, or env files. They are automatically hashed for rolling updates."
+exam_tips:
+  - "kubectl apply -k <directory> applies a kustomization directory. kubectl kustomize <directory> builds the YAML without applying."
+  - "Kustomize is built into kubectl. You do not need to install it separately."
+  - "Know the difference between Kustomize (template-free YAML patching) and Helm (templating engine). Both are on the CKA curriculum."
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: ""
+verify_expected: ""
+solution_files:
+  - 05_Cluster_Architecture/solutions/task7-kustomize/kustomization.yaml
+prerequisites: []

@@ -1,0 +1,21 @@
+id: "trb-006"
+domain: "troubleshooting"
+title: "Analyze Container Logs to Diagnose Application Failure"
+description: |
+  A pod named app-server in namespace troubleshooting is running but not serving traffic correctly.
+  Check its logs to identify the issue (listening on wrong port). Fix the container to listen on
+  port 8080 instead of 80.
+difficulty: "easy"
+time_estimate: "4min"
+weight: 5
+tags: ["logs", "troubleshooting", "containers"]
+hints:
+  - "Use kubectl logs app-server -n troubleshooting."
+  - "Also try --previous flag if the container restarted."
+  - "Look for log entries indicating the port the application is binding to."
+exam_tips:
+  - "kubectl logs is essential. Remember -c for multi-container pods and --previous for crashed containers."
+solution_files:
+  - "04_troubleshooting/task6-container-logs.yaml"
+verify_command: "kubectl get pod log-checker -n troubleshooting -o jsonpath='{.status.phase}'"
+verify_expected: "Running"

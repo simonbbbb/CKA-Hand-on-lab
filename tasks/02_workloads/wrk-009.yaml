@@ -1,0 +1,71 @@
+id: wrk-009
+domain: "Workloads & Scheduling"
+title: "Multi-Metric Autoscaling with Custom Metrics"
+description: |
+  Create a Horizontal Pod Autoscaler for an existing deployment named `web-frontend`
+  in the `default` namespace that scales based on multiple metrics.
+
+  Requirements:
+  1. Create an HPA named `web-frontend-hpa`.
+  2. Target the deployment `web-frontend`.
+  3. Min replicas: 3, max replicas: 15.
+  4. Include the following metrics:
+     a. CPU utilization target: 70%
+     b. Memory utilization target: 80%
+     c. Custom metric: `requests-per-second` (Pods metric type) with target value 1000
+  5. The HPA will use the highest replica count suggested by any individual metric.
+
+  Note: The custom metric `requests-per-second` requires a metrics pipeline
+  (e.g., Prometheus Adapter) to be installed in the cluster. For the exam,
+  you only need to write the correct HPA manifest.
+
+  Verification:
+    kubectl get hpa web-frontend-hpa
+    kubectl get hpa web-frontend-hpa -o yaml
+difficulty: hard
+time_estimate: 8
+weight: 5
+tags:
+  - hpa
+  - autoscaling
+  - multi-metric
+  - custom-metrics
+  - prometheus
+Hints:
+  - hint: "Use autoscaling/v2 API. Each metric is a separate item in the metrics array."
+    level: 1
+  - hint: "For CPU and memory use type: Resource. For the custom metric use type: Pods with a metric.name and target.averageValue."
+    level: 2
+  - hint: |
+      metrics:
+      - type: Resource
+        resource:
+          name: cpu
+          target:
+            type: Utilization
+            averageUtilization: 70
+      - type: Resource
+        resource:
+          name: memory
+          target:
+            type: Utilization
+            averageUtilization: 80
+      - type: Pods
+        pods:
+          metric:
+            name: requests-per-second
+          target:
+            type: AverageValue
+            averageValue: "1000"
+    level: 3
+exam_tips: |
+  - autoscaling/v2 supports multiple metrics out of the box.
+  - Resource metrics use Utilization type (percentage). Pod metrics use AverageValue.
+  - For custom/Pod metrics, the averageValue is a Quantity string (e.g., "1000" or "1k").
+  - The HPA will calculate the desired replicas for EACH metric and pick the highest.
+  - In the exam, you likely won't need to install Prometheus Adapter — just write the YAML.
+  - Remember: kubectl explain hpa.spec.metrics is your friend during the exam.
+verify_command: "kubectl get hpa -l task=multi-metric-hpa -o jsonpath='{.items[0].spec.metrics[0].resource.name}'"
+verify_expected: "cpu"
+solution_files:
+  - solutions/02_workloads/wrk-009-multi-metric-hpa.yaml

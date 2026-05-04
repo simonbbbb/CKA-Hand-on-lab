@@ -1,0 +1,31 @@
+---
+# Solution A: Fix the pod to comply with the "restricted" profile
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secure-ns
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged-app
+  namespace: secure-ns
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: privileged-app
+    image: nginx:1.25
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop:
+        - ALL

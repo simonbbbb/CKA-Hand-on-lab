@@ -1,0 +1,38 @@
+id: wrk-003
+domain: workloads-scheduling
+title: Roll Back a Deployment
+description: |
+  Roll back the deployment from wrk-002 to its previous version (nginx:1.14.2).
+
+  1. Check the rollout history to identify the revision to roll back to
+  2. Roll back to the previous revision
+  3. Verify the pods are now running `nginx:1.14.2`
+
+  ```
+  kubectl rollout history deployment/nginx-deployment
+  kubectl rollout undo deployment/nginx-deployment
+  kubectl get pods -l app=nginx -o jsonpath='{.items[*].spec.containers[0].image}'
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - deployment
+  - rollback
+  - revision-history
+hints:
+  - "Use kubectl rollout undo deployment/nginx-deployment to roll back to the previous revision. Add --to-revision=N to target a specific revision."
+  - "Check the history first with kubectl rollout history deployment/nginx-deployment to see available revisions and their change causes."
+  - "After rolling back, verify with kubectl rollout status deployment/nginx-deployment and check the image version in the pod spec."
+exam_tips:
+  - "kubectl rollout undo deployment/<name> rolls back one revision. Use --to-revision=N for specific revisions."
+  - "Add --record (deprecated but still functional) or use annotations to track change causes in rollout history."
+  - "If the rollback itself fails (e.g., bad image in the previous revision), you can always roll forward again with kubectl set image."
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get deployment nginx-deployment -o jsonpath='{.spec.template.spec.containers[0].image}'"
+verify_expected: "nginx:1.14.2"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task3-rollback.yaml
+prerequisites:
+  - wrk-002

@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CKA Lab Task",
+  "description": "Schema for CKA exam prep platform task definitions",
+  "type": "object",
+  "required": ["id", "domain", "title", "description", "difficulty", "time_estimate", "weight", "hints"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique task identifier in domain-number format",
+      "pattern": "^(sto|wrk|net|trb|arc)-\\d{3}$"
+    },
+    "domain": {
+      "type": "string",
+      "description": "CKA exam domain this task belongs to",
+      "enum": [
+        "storage",
+        "workloads-scheduling",
+        "services-networking",
+        "troubleshooting",
+        "cluster-architecture"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Short descriptive title of the task",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed multiline markdown description of the task requirements",
+      "minLength": 1
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "Difficulty level of the task",
+      "enum": ["easy", "medium", "hard"]
+    },
+    "time_estimate": {
+      "type": "string",
+      "description": "Estimated time to complete the task",
+      "pattern": "^\\d+min$"
+    },
+    "weight": {
+      "type": "number",
+      "description": "Point value for scoring",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "tags": {
+      "type": "array",
+      "description": "Keywords for categorization and filtering",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "hints": {
+      "type": "array",
+      "description": "Progressive hints from gentle nudge to near-solution (exactly 3)",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "exam_tips": {
+      "type": "array",
+      "description": "Tips specific to the CKA exam format and strategy",
+      "items": {
+        "type": "string"
+      }
+    },
+    "setup_script": {
+      "type": "string",
+      "description": "Filename of the setup script in the setup/ directory"
+    },
+    "verify_script": {
+      "type": "string",
+      "description": "Filename of the verification script in the setup/ directory"
+    },
+    "verify_command": {
+      "type": "string",
+      "description": "kubectl command to run for automated verification"
+    },
+    "verify_expected": {
+      "type": "string",
+      "description": "Expected output from verify_command (checked as substring match)"
+    },
+    "solution_files": {
+      "type": "array",
+      "description": "Paths to solution files relative to the domain directory",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "description": "Task IDs that must be completed before this task",
+      "items": {
+        "type": "string",
+        "pattern": "^(sto|wrk|net|trb|arc)-\\d{3}$"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+id: net-012
+domain: "Services & Networking"
+title: "Egress Traffic Control with Multiple Destinations"
+description: |
+  Create a NetworkPolicy in the `frontend` namespace for pods labeled `app=webapp`
+  that controls egress traffic with the following rules:
+
+  Requirements:
+  1. Create the namespace `frontend` if it does not already exist.
+  2. Create a NetworkPolicy named `webapp-egress` in namespace `frontend`.
+  3. Apply the policy to pods with label `app=webapp`.
+  4. ALLOW egress to pods with label `app=cache` in the SAME namespace on TCP port 6379.
+  5. ALLOW egress to external DNS at IP 8.8.8.8 on port 53 (both UDP and TCP).
+  6. DENY all other egress traffic (this is implicit when egress policyType is set).
+  7. Do NOT restrict ingress traffic.
+
+  Note: When you define an egress policyType and specify egress rules, any egress
+  traffic NOT matching those rules is automatically denied.
+
+  Verification:
+    kubectl get networkpolicy webapp-egress -n frontend -o yaml
+    # Test: pod with app=webapp can reach cache pod on port 6379
+    # Test: pod can resolve DNS via 8.8.8.8:53
+    # Test: pod CANNOT reach any other external or cluster destination
+difficulty: hard
+time_estimate: 7
+weight: 5
+tags:
+  - networkpolicy
+  - egress
+  - dns
+  - ipblock
+  - security
+hints:
+  - hint: "Set policyTypes to only 'Egress'. Use ipBlock for the external DNS destination."
+    level: 1
+  - hint: "Create two separate egress rule entries: one for the cache pods (podSelector) and one for DNS (ipBlock to 8.8.8.8/32)."
+    level: 2
+  - hint: |
+      spec:
+        podSelector:
+          matchLabels:
+            app: webapp
+        policyTypes:
+        - Egress
+        egress:
+        - to:
+          - podSelector:
+              matchLabels:
+                app: cache
+          ports:
+          - protocol: TCP
+            port: 6379
+        - to:
+          - ipBlock:
+              cidr: 8.8.8.8/32
+          ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
+    level: 3
+exam_tips: |
+  - Egress NetworkPolicy is less common than ingress but appears in harder questions.
+  - When policyTypes includes Egress and you define egress rules, everything else is denied.
+  - Use ipBlock with /32 CIDR for specific external IPs.
+  - DNS uses both UDP and TCP port 53 — include both protocols.
+  - For same-namespace podSelector in egress 'to', you do NOT need a namespaceSelector.
+verify_command: "kubectl get networkpolicy -n networking egress-multi -o jsonpath='{.spec.egress[0].to[0].ipBlock.cidr}'"
+verify_expected: "0.0.0.0/0"
+solution_files:
+  - solutions/03_networking/net-012-egress-netpol.yaml

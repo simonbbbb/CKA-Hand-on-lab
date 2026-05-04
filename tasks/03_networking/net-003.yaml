@@ -1,0 +1,22 @@
+id: "net-003"
+domain: "services-networking"
+title: "Configure Ingress with Path-Based Routing"
+description: |
+  Deploy an Ingress Resource (named myapp-ingress in namespace networking) that routes:
+  - Traffic for myapp.example.com/api to a service called api-service on port 80
+  - Traffic for myapp.example.com to a service called web-service on port 80
+difficulty: "medium"
+time_estimate: "8min"
+weight: 8
+tags: ["ingress", "path-routing"]
+hints:
+  - "Use networking.k8s.io/v1 Ingress. You need spec.rules with host and http.paths."
+  - "Each path entry needs path, pathType, and a backend with service name and port number."
+  - "Order matters: place the more specific /api path before the catch-all / path."
+exam_tips:
+  - "Know the difference between pathType: Prefix and pathType: Exact."
+  - "On the exam, you may need to enable the ingress addon first: minikube addons enable ingress."
+verify_command: "kubectl get ingress -n networking -o jsonpath='{.items[0].spec.rules[0].http.paths[0].path}'"
+verify_expected: "/"
+solution_files:
+  - "03_networking/task3-ingress-resource.yaml"

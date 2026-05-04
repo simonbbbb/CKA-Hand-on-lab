@@ -1,0 +1,23 @@
+id: "net-005"
+domain: "services-networking"
+title: "Create a Multi-Port Service"
+description: |
+  Create a Service named multi-port-service in namespace networking that exposes:
+  - Port 80 (name: http) targeting container port 8080
+  - Port 443 (name: https) targeting container port 8443
+  Selector: app=multi-port-app
+difficulty: "easy"
+time_estimate: "4min"
+weight: 4
+tags: ["service", "multi-port"]
+hints:
+  - "In the service spec, use multiple items in the ports array. Each port needs a name."
+  - "Set targetPort to the container port (8080 and 8443), not the service port."
+  - "Each port entry must have a unique name field when a service exposes multiple ports."
+exam_tips:
+  - "When a service exposes multiple ports, each port must have a unique name field. This is required."
+  - "Using named targetPort values is more maintainable than numeric references."
+verify_command: "kubectl get service -n networking -o jsonpath='{.items[*].spec.type}'"
+verify_expected: "NodePort"
+solution_files:
+  - "03_networking/task5-multi-port-service.yaml"

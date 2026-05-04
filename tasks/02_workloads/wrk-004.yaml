@@ -1,0 +1,52 @@
+id: wrk-004
+domain: workloads-scheduling
+title: Configure Applications with ConfigMaps and Secrets
+description: |
+  Complete the following steps:
+
+  1. Create a ConfigMap named `app-config` with the following data:
+     - `DATABASE_URL=mysql://db:3306/mydb`
+     - `DEBUG_MODE=true`
+
+  2. Create a Secret named `app-secret` with the following data:
+     - `username=admin`
+     - `password=supersecret`
+
+  3. Create a Pod named `app-pod` with image `nginx` that uses both the
+     ConfigMap and Secret as environment variables:
+     - `DATABASE_URL` from ConfigMap key `DATABASE_URL`
+     - `DEBUG_MODE` from ConfigMap key `DEBUG_MODE`
+     - `USERNAME` from Secret key `username`
+     - `PASSWORD` from Secret key `password`
+
+  Verify the pod is running and the environment variables are set:
+
+  ```
+  kubectl get pod app-pod
+  kubectl exec app-pod -- env | grep -E 'DATABASE_URL|DEBUG_MODE|USERNAME|PASSWORD'
+  ```
+difficulty: medium
+time_estimate: 10min
+weight: 7
+tags:
+  - configmap
+  - secret
+  - environment-variables
+  - pod
+hints:
+  - Create the ConfigMap with `kubectl create configmap app-config --from-literal=DATABASE_URL=mysql://db:3306/mydb --from-literal=DEBUG_MODE=true`.
+  - Create the Secret with `kubectl create secret generic app-secret --from-literal=username=admin --from-literal=password=supersecret`. Secrets are base64-encoded automatically.
+  - In the Pod spec, use `env[].valueFrom.configMapKeyRef` for ConfigMap values and `env[].valueFrom.secretKeyRef` for Secret values. Each env var needs `name`, and the ref needs `name` (of the ConfigMap/Secret) and `key`.
+exam_tips:
+  - Use imperative `kubectl create configmap` and `kubectl create secret generic` to save time. They handle base64 encoding for secrets automatically.
+  - Secret values must be base64-encoded in YAML manifests. If writing YAML by hand, encode with `echo -n 'admin' | base64`.
+  - You can also mount ConfigMaps and Secrets as files using `volumeMounts`, but the exam usually specifies which method to use.
+setup_script: 02_setup_workloads_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pod app-pod -o jsonpath='{.spec.containers[0].env[0].valueFrom.configMapKeyRef.name}'"
+verify_expected: "app-config"
+solution_files:
+  - 02_Workloads_Scheduling/solutions/task4-configmap.yaml
+  - 02_Workloads_Scheduling/solutions/task4-secret.yaml
+  - 02_Workloads_Scheduling/solutions/task4-pod-config-secret.yaml
+prerequisites: []

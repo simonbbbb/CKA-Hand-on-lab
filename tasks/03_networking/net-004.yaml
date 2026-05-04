@@ -1,0 +1,22 @@
+id: "net-004"
+domain: "services-networking"
+title: "Troubleshoot Service Connectivity Issues"
+description: |
+  A service named frontend-service in namespace troubleshooting is not routing traffic to the
+  web-deployment pods. Investigate and fix the selector mismatch so the service correctly targets
+  pods with label app=web.
+difficulty: "medium"
+time_estimate: "6min"
+weight: 7
+tags: ["troubleshooting", "service", "endpoints"]
+hints:
+  - "Check kubectl get endpoints to see if the service has any endpoints."
+  - "Compare service selector with pod labels using kubectl describe svc and kubectl get pods --show-labels."
+  - "Use kubectl edit svc frontend-service -n troubleshooting to fix the selector."
+exam_tips:
+  - "Service connectivity issues almost always come down to mismatched selectors or missing labels."
+  - "Always check kubectl get endpoints first when debugging service issues."
+verify_command: "kubectl get pod -n networking -l task=dns-resolution -o jsonpath='{.items[0].spec.containers[0].env[0].name}'"
+verify_expected: "SERVICE_URL"
+solution_files:
+  - "03_networking/task4-service-connectivity.yaml"

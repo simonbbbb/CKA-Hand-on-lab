@@ -1,0 +1,21 @@
+id: "trb-004"
+domain: "troubleshooting"
+title: "Fix a Pod Failing Due to Missing ConfigMap"
+description: |
+  The config-error-pod in namespace troubleshooting fails because it references a ConfigMap
+  that doesn't exist. Create the missing ConfigMap named app-config with key DATABASE_URL set
+  to "mysql://user:password@db:3306/app".
+difficulty: "easy"
+time_estimate: "5min"
+weight: 5
+tags: ["configmap", "pod", "troubleshooting"]
+hints:
+  - "kubectl describe pod will show the ConfigMap not found error."
+  - "Create it with kubectl create configmap."
+  - "The ConfigMap must be named app-config with key DATABASE_URL."
+exam_tips:
+  - "ConfigMap/Secret issues are common. Always check if referenced resources exist."
+solution_files:
+  - "04_troubleshooting/task4-configmap-error-fix.yaml"
+verify_command: "kubectl get configmap app-config -n troubleshooting -o jsonpath='{.data.DATABASE_URL}'"
+verify_expected: "mysql://user:password@db:3306/app"

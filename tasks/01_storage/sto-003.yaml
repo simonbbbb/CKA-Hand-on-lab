@@ -1,0 +1,42 @@
+id: sto-003
+domain: storage
+title: Create a Persistent Volume Claim
+description: |
+  Create a Persistent Volume Claim that binds to the PV created in sto-002:
+
+  - **Name:** `pvc-manual`
+  - **Storage Request:** 500Mi
+  - **Access Mode:** ReadWriteOnce
+  - **StorageClass:** `manual`
+
+  The PVC should bind to `pv-manual` since the storage class and access mode match
+  and the request (500Mi) is within the PV capacity (1Gi).
+
+  Verify the PVC is bound:
+
+  ```
+  kubectl get pvc pvc-manual
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - persistentvolumeclaim
+  - storage
+  - binding
+hints:
+  - "PVCs are namespaced resources. Use apiVersion: v1 and kind: PersistentVolumeClaim. The storageClassName must match the PV exactly."
+  - "The key fields are spec.storageClassName: manual, spec.accessModes: [ReadWriteOnce], and spec.resources.requests.storage: 500Mi."
+  - "If the PVC stays in Pending, check that the storageClassName matches the PV, the access mode is compatible, and the requested storage does not exceed the PV capacity."
+exam_tips:
+  - "PVC binding issues are common exam traps. Always verify with kubectl get pvc that the status shows Bound."
+  - "Use kubectl describe pvc <name> to see events explaining why a PVC is not binding."
+  - "If you see WaitForFirstConsumer binding mode, the PVC will not bind until a pod references it."
+setup_script: 01_setup_storage_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pvc pvc-manual -o jsonpath='{.spec.resources.requests.storage} {.spec.accessModes[0]} {.spec.storageClassName}'"
+verify_expected: "500Mi ReadWriteOnce manual"
+solution_files:
+  - 01_Storage/solutions/task3-persistent-volume-claim.yaml
+prerequisites:
+  - sto-002

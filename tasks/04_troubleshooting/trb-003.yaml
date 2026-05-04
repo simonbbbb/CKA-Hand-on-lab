@@ -1,0 +1,21 @@
+id: "trb-003"
+domain: "troubleshooting"
+title: "Fix Service Selector Mismatch"
+description: |
+  The web-service in namespace troubleshooting isn't routing traffic to web-deployment pods.
+  The service selector doesn't match the pod labels. Fix the selector so it correctly targets
+  pods with label app=web. Verify with kubectl get endpoints.
+difficulty: "medium"
+time_estimate: "5min"
+weight: 7
+tags: ["service", "selector", "endpoints"]
+hints:
+  - "Check kubectl get endpoints to see if the service has backends."
+  - "Compare kubectl get pods --show-labels with kubectl get svc -o yaml."
+  - "The service selector must exactly match the pod labels for routing to work."
+exam_tips:
+  - "Selector mismatches are one of the most common CKA troubleshooting scenarios."
+solution_files:
+  - "04_troubleshooting/task3-service-selector-fix.yaml"
+verify_command: "kubectl get endpoints frontend-service -n troubleshooting -o jsonpath='{.subsets[0].addresses}'"
+verify_expected: "."

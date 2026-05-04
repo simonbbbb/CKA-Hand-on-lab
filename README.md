@@ -1,280 +1,267 @@
-# CKA (Certified Kubernetes Administrator) Exam Preparation Lab
+<div align="center">
 
-This repository contains practice questions, hands-on tasks, and resources to help you prepare for the CKA exam. The materials are organized according to the official CKA curriculum domains and their respective weights.
+# CKA Lab
 
+**The definitive hands-on CKA exam prep platform**
 
-- [Medium Article](https://medium.com/@balazsdevops/preparing-for-the-new-cka-exam-a-hands-on-lab-environment-00b2b04c3c1f)
-- [GitHub Repository](https://github.com/simonbbbb/CKA-Hand-on-lab)
-- [CNCF CKA Curriculum](https://github.com/cncf/curriculum/blob/master/CKA_Curriculum_v1.32.pdf)
+[![Rust](https://img.shields.io/badge/rust-1.75+-orange?logo=rust)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CKA v1.35](https://img.shields.io/badge/CKA-v1.35-green?logo=kubernetes)](https://www.cncf.io/certification/cka/)
+[![Tasks](https://img.shields.io/badge/tasks-55+-cyan)]()
 
-![CKA Lab TUI Interface](img/tui.png)
+[Get Started](#-quick-start) · [Features](#-features) · [Domains](#-curriculum-domains) · [Landing Page](https://simonbbbb.github.io/CKA-Hand-on-lab/) · [Contributing](CONTRIBUTING.md)
+
+</div>
+
+---
+
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║    ██████╗██╗  ██╗ █████╗ ██╗     ██╗   ██╗███████╗              ║
+║   ██╔════╝██║  ██║██╔══██╗██║     ██║   ██║██╔════╝              ║
+║   ██║     ███████║███████║██║     ██║   ██║███████╗              ║
+║   ██║     ██╔══██║██╔══██║██║     ██║   ██║╚════██║              ║
+║   ╚██████╗██║  ██║██║  ██║███████╗╚██████╔╝███████║              ║
+║    ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚══════╝              ║
+║                                                                   ║
+║              Hands-On Lab  ·  Exam Simulator  ·  v2.0             ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
+
+## Why CKA Lab?
+
+Studying for the CKA exam? Most resources give you passive reading or scattered practice questions. **CKA Lab gives you a real, interactive practice environment** with a beautiful terminal UI, auto-verification, and an exam simulator that mirrors the real test.
+
+- **55+ hands-on tasks** aligned to the latest CKA v1.35 curriculum
+- **Exam simulator** with a 2-hour timer and realistic question flow
+- **Auto-verification** — know instantly if your solution is correct
+- **Progressive hints** — 3 levels per task so you never stay stuck
+- **Works with any cluster** — minikube, kind, k3s, or cloud
+
+## Features
+
+### Beautiful TUI
+
+A rich terminal interface built with Rust + Ratatui. Navigate domains, browse tasks, track progress — all from your terminal.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  CKA Lab v2.0  ·  Dashboard                                      │
+├──────────────────────┬──────────────────────────────────────────┤
+│                      │                                            │
+│  ■ Storage (10%)     │  ████████████░░░░  4/5  (80%)            │
+│  ■ Workloads (15%)   │  ██████░░░░░░░░░░  6/9  (67%)            │
+│  ■ Networking (20%)  │  ████████████████  12/12 (100%) ✓        │
+│  ■ Troubleshoot (30%)│  ██████████░░░░░░  8/12 (67%)            │
+│  ■ Cluster Arch (25%)│  █████████████░░░  7/9  (78%)            │
+│                      │                                            │
+│  Overall: 74%        │  [E] Start Exam   [Q] Quit               │
+│  ████████████░░░░░░  │                                            │
+│                      │                                            │
+└──────────────────────┴──────────────────────────────────────────┘
+```
+
+### Exam Simulator
+
+Practice under real exam conditions — 120 minutes, 16-17 questions, context switching between nodes.
+
+### Auto-Verification
+
+Run `cka-lab verify` and get instant feedback on every task. No more guessing if your solution is correct.
+
+## Quick Start
+
+### Option 1: Build from source (recommended)
+
+```bash
+git clone https://github.com/simonbbbb/CKA-Hand-on-lab.git
+cd CKA-Hand-on-lab
+cargo run --release
+```
+
+### Option 2: Use the bash TUI (no Rust needed)
+
+```bash
+git clone https://github.com/simonbbbb/CKA-Hand-on-lab.git
+cd CKA-Hand-on-lab/setup
+./lab_launcher.sh
+```
+
+### Option 3: Just the tasks
+
+Each domain has a `README.md` with tasks and a `solutions/` directory. Read the task, write your YAML, apply it with `kubectl`, verify.
 
 ## Curriculum Domains
 
-1. **Storage (10%)**
-   - Implement storage classes and dynamic volume provisioning
-   - Configure volume types, access modes, and reclaim policies
-   - Manage persistent volumes and persistent volume claims
+Aligned with the [official CKA v1.35 curriculum](https://github.com/cncf/curriculum):
 
-2. **Workloads and Scheduling (15%)**
-   - Understand application deployments and how to perform rolling updates and rollbacks
-   - Use ConfigMaps and Secrets to configure applications
-   - Configure workload autoscaling
-   - Understand the primitives used to create robust, self-healing, application deployments
-   - Configure Pod admission and scheduling (limits, node affinity, etc.)
+| # | Domain | Weight | Tasks | Key Topics |
+|---|--------|--------|-------|------------|
+| 1 | **Storage** | 10% | 5 | StorageClasses, PV, PVC, dynamic provisioning |
+| 2 | **Workloads & Scheduling** | 15% | 9 | Deployments, ConfigMaps, Secrets, HPA, affinity |
+| 3 | **Services & Networking** | 20% | 12 | NetworkPolicies, Gateway API, Ingress, CoreDNS |
+| 4 | **Troubleshooting** | 30% | 12 | Pod failures, node issues, control plane, networking |
+| 5 | **Cluster Architecture** | 25% | 9 | RBAC, CRDs, kubeadm, etcd, Helm, Kustomize, Pod Security |
 
-3. **Servicing and Networking (20%)**
-   - Understand connectivity between Pods
-   - Define and enforce Network Policies
-   - Use ClusterIP, NodePort, LoadBalancer service types and endpoints
-   - Use the Gateway API to manage Ingress traffic
-   - Know how to use Ingress controllers and Ingress resources
-   - Understand and use CoreDNS
+### What's New in CKA v1.35 (Feb 2025)
 
-4. **Troubleshooting (30%)**
-   - Fix pod with image pull errors
-   - Resolve resource constraint issues
-   - Fix service connectivity problems
-   - Resolve ConfigMap-related errors
-   - Fix deployment update strategies
-   - Troubleshoot node-level issues
-   - Resolve DNS resolution problems
+This repo is fully updated with the latest curriculum changes:
 
-5. **Cluster Architecture, Installation and Configuration (25%)**
-   - Create and manage RBAC roles
-   - Configure RBAC role bindings
-   - Create Custom Resource Definitions (CRDs)
-   - Prepare kubeadm configuration files
-   - Document and perform etcd backup procedures
-   - Work with Helm charts
-   - Create Kustomize configurations
+- **Gateway API** — GatewayClass, Gateway, HTTPRoute (3-5 exam questions expected)
+- **Helm & Kustomize** — Package management is now examinable
+- **Workload Autoscaling** — HPA and VPA
+- **Pod Security Standards** — Replaces deprecated Pod Security Policies
+- **Extension Interfaces** — CNI, CSI, CRI understanding
 
-## Setup Instructions
+## Directory Structure
 
-### Prerequisites
+```
+CKA-Hand-on-lab/
+├── src/                      # Rust TUI source code
+├── tasks/                    # YAML task definitions (55+ tasks)
+│   ├── schema.json           # Task schema for validation
+│   ├── 01_storage/
+│   ├── 02_workloads/
+│   ├── 03_networking/
+│   ├── 04_troubleshooting/
+│   └── 05_cluster_arch/
+├── solutions/                # Official solution files per domain
+├── setup/                    # Setup scripts + bash TUI launcher
+├── docs/                     # Landing site (GitHub Pages)
+├── helper.md                 # Kubernetes & Helm cheat sheet
+└── CONTRIBUTING.md           # How to contribute new tasks
+```
 
-- Basic knowledge of Linux and container concepts
-- Terminal/Command Line familiarity
-- Git installed
+## Prerequisites
 
-### Environment Setup Options
+- **Kubernetes cluster** — any of:
+  - [Minikube](https://minikube.sigs.k8s.io/) (recommended for local)
+  - [kind](https://kind.sigs.k8s.io/)
+  - [k3s](https://k3s.io/)
+  - Cloud cluster (GKE, AKS, EKS)
+- **kubectl** — configured to access your cluster
+- **Rust** (for TUI) — `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 
-#### Option 1: Using Docker (Most Common)
+## Environment Setup
 
-1. **Requirements:**
-   - Docker Desktop installed and running
-   - `kubectl` command-line tool
-   - Minikube
-
-2. **Setup Steps:**
-   ```bash
-   # Start Minikube with Docker driver
-   cd setup
-   ./reset_lab_environment.sh  # This will initialize Minikube with Docker driver
-   ```
-
-#### Option 2: Using macOS with Apple Silicon (M1/M2/M3)
-
-1. **Requirements:**
-   - QEMU installed (`brew install qemu`)
-   - `kubectl` command-line tool
-   - Minikube
-
-2. **Setup Steps:**
-   ```bash
-   # Start Minikube with QEMU driver
-   cd setup
-   ./reset_lab_environment.sh  # The script is configured to use qemu2 driver for Apple Silicon
-   ```
-
-#### Option 3: Using any other environment
-
-1. **Requirements:**
-   - Any Kubernetes cluster (cloud-based GKE, AKS, EKS or local Kind, k3s, etc.)
-   - `kubectl` configured to access your cluster
-
-2. **Setup Steps:**
-   - Skip the Minikube parts of the setup scripts
-   - Manually apply the Kubernetes resources from each section
-
-### Setting Up Lab Environments
-
-#### Option 1: Using the TUI Launcher (Recommended)
-
-The repository includes a Text-based User Interface (TUI) launcher for easy navigation and management of the lab environments:
+### macOS (Apple Silicon)
 
 ```bash
-cd setup
-./lab_launcher.sh        # Launches the interactive TUI
+brew install qemu minikube kubectl
+cd setup && ./reset_lab_environment.sh
 ```
 
-This launcher provides a menu-driven interface to:
-- Start/reset the Minikube environment
-- Set up individual lab environments for each domain
-- Check the status of resources in each namespace
-- View node status
-
-#### Option 2: Using Individual Setup Scripts
-
-The repository contains setup scripts for each domain:
+### macOS / Linux (Docker)
 
 ```bash
-cd setup
-./01_setup_storage_lab.sh        # Sets up Storage lab environment
-./02_setup_workloads_lab.sh      # Sets up Workloads lab environment
-./03_setup_networking_lab.sh     # Sets up Networking lab environment
-./04_setup_troubleshooting_lab.sh # Sets up Troubleshooting lab environment
-./05_setup_cluster_arch_lab.sh   # Sets up Cluster Architecture lab environment
+# Ensure Docker Desktop is running
+cd setup && ./reset_lab_environment.sh
 ```
 
-To reset your environment at any time:
+### Any Cluster
 
 ```bash
-cd setup
-./reset_lab_environment.sh
+# Skip minikube setup — just apply resources directly
+cd setup && ./01_setup_storage_lab.sh
 ```
 
-## How to Use This Repository
-
-### Directory Structure
+## Workflow
 
 ```
-CKA_LAB/
-├── 01_Storage/                # Storage domain exercises
-│   ├── README.md              # Task instructions
-│   ├── solutions/             # Official solution files
-│   └── user_solutions/        # Your solutions (gitignored)
-├── 02_Workloads/              # Workloads domain exercises
-│   ├── ...
-├── 03_Networking/             # Networking domain exercises
-│   ├── ...
-├── 04_Troubleshooting/        # Troubleshooting domain exercises
-│   ├── ...
-├── 05_Cluster_Architecture/   # Cluster Architecture domain exercises
-│   ├── ...
-└── setup/                     # Setup scripts
-    ├── 01_setup_storage_lab.sh
-    ├── ...
-    ├── reset_lab_environment.sh
-    └── verify_solutions.sh    # Script to verify your solutions
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Read Task   │───▶│  Write YAML  │───▶│  kubectl     │───▶│  Verify      │
+│  in TUI      │    │  Solution    │    │  apply -f    │    │  Solution    │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+                                               │                     │
+                                               ▼                     ▼
+                                        ┌──────────────┐    ┌──────────────┐
+                                        │  Check with  │    │  Compare to  │
+                                        │  kubectl get │    │  official    │
+                                        └──────────────┘    │  solution    │
+                                                            └──────────────┘
 ```
 
-### Recommended Workflow
+## CKA Exam Tips
 
-1. **Prepare your environment:**
-   ```bash
-   cd setup
-   ./reset_lab_environment.sh
-   ```
+<details>
+<summary>Time Management</summary>
 
-2. **Start with a section:**
-   - Read the README.md in the section directory
-   - Run the corresponding setup script: `./setup/01_setup_storage_lab.sh`
+- 2 hours for 16-17 questions (~7 min per question)
+- Skip hard questions, bookmark them, come back
+- Start with your strongest domain
+- Use `kubectl --dry-run=client -o yaml` to generate YAML templates
 
-3. **Complete the hands-on tasks:**
-   - Create your solution files in the `user_solutions` directory
-   - Apply your solutions to the cluster with `kubectl apply`
+</details>
 
-4. **Verify your solutions:**
-   ```bash
-   cd setup
-   ./verify_solutions.sh
-   # Select the appropriate section to verify
-   ```
+<details>
+<summary>Command Shortcuts</summary>
 
-5. **Compare with official solutions:**
-   - Only after attempting the tasks, review the official solutions
+```bash
+# Must-know aliases (pre-configured in exam)
+alias k=kubectl
+source <(kubectl completion bash)
 
-6. **Reset and move to the next section:**
-   ```bash
-   cd setup
-   ./reset_lab_environment.sh
-   ./02_setup_workloads_lab.sh  # For the next section
-   ```
+# Generate YAML quickly
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > deploy.yaml
+kubectl expose pod nginx --port=80 --target-port=8080 --dry-run=client -o yaml
 
-### Important Notes
+# Use kubectl explain instead of docs
+kubectl explain pod.spec.containers.resources
+kubectl explain deployment.spec.strategy
+```
 
-1. **User Solutions:** 
-   - Each section has a `user_solutions/` directory where you should save your YAML files
-   - These directories are gitignored, so you won't accidentally commit your solutions
+</details>
 
-2. **Setup Scripts:**
-   - The setup scripts create the necessary infrastructure but don't provide complete solutions
-   - They may create some resources that are similar to what you need to create in the tasks
+<details>
+<summary>Exam Environment</summary>
 
-3. **Verification:**
-   - Use the `verify_solutions.sh` script to check if your solutions meet the requirements
-   - The script will provide feedback on what's correct and what needs fixing
+- Browser-based terminal via PSI Bridge
+- `k` alias and bash completion pre-configured on SSH nodes
+- Copy/paste: `Ctrl+Shift+C/V` (not standard Ctrl+C/V)
+- Only kubernetes.io/docs is accessible
+- Tools available: `jq`, `vim`, `nano`, `curl`, `wget`
 
-### Helm and Kustomize Tasks
+</details>
 
-The updated CKA exam (February 2025) includes tasks related to Helm and Kustomize for package management. In the Cluster Architecture section, you'll find:
+## Contributing
 
-1. **Helm Tasks:**
-   - Creating and customizing Helm chart values
-   - Installing applications using Helm charts
-   - Managing releases and upgrades
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
-2. **Kustomize Tasks:**
-   - Using Kustomize to manage Kubernetes manifests
-   - Creating overlays for different environments
-   - Patching resources with Kustomize
+- How to add new tasks
+- Task YAML schema reference
+- Solution file guidelines
+- Verification script requirements
 
-## Troubleshooting Common Issues
-
-### Minikube Issues on macOS Silicon
-
-If you encounter issues with Minikube on Apple Silicon:
-
-1. **Docker Driver Not Working:**
-   ```bash
-   # Make sure to install QEMU
-   brew install qemu
-   
-   # Use the qemu2 driver instead
-   minikube delete
-   minikube start --driver=qemu2 --memory=4096 --cpus=2
-   ```
-
-2. **Slow Performance:**
-   - Increase the memory and CPU allocation in the scripts
-   - Modify the line: `minikube start --memory=6144 --cpus=4 --driver=qemu2`
-
-### Kubernetes Resource Issues
-
-If you encounter issues with Kubernetes resources:
-
-1. **Resource not found:**
-   ```bash
-   # Check if the namespace exists
-   kubectl get namespaces
-   
-   # Ensure you're in the correct namespace
-   kubectl config set-context --current --namespace=<namespace>
-   ```
-
-2. **Permission issues:**
-   ```bash
-   # Check RBAC settings
-   kubectl auth can-i create deployments
-   kubectl auth can-i create pods
-   ```
-
-## Additional Resources
+## Resources
 
 - [Kubernetes Documentation](https://kubernetes.io/docs/home/)
 - [CKA Curriculum](https://github.com/cncf/curriculum)
-- [CNCF Certification Information](https://www.cncf.io/certification/cka/)
+- [CNCF Certification](https://www.cncf.io/certification/cka/)
+- [Medium Article](https://medium.com/@balazsdevops/preparing-for-the-new-cka-exam-a-hands-on-lab-environment-00b2b04c3c1f)
 
-## About the Author
+## Author
 
-Visit my personal page projects and blog:
+**Simon Balazs**
 
-- Personal Site: [www.simonbalazs.hu](https://simonbalazs.hu)
-- GitHub: [github.com/simonbbbb](https://github.com/simonbbbb)
-- LinkedIn: [linkedin.com/in/simonbalazshu](https://www.linkedin.com/in/simonbalazshu)
-- Medium: [medium.com/@balazsdevops](https://medium.com/@balazsdevops)
+- [simonbalazs.hu](https://simonbalazs.hu)
+- [GitHub](https://github.com/simonbbbb)
+- [LinkedIn](https://www.linkedin.com/in/simonbalazshu)
+- [Medium](https://medium.com/@balazsdevops)
 
-Feel free to reach out with questions about the lab environment or Kubernetes in general!
+## License
 
-Good luck with your CKA exam preparation!
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Good luck with your CKA exam!**
+
+If this repo helped you, consider giving it a star.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=simonbbbb/CKA-Hand-on-lab&type=Date)](https://star-history.com/#simonbbbb/CKA-Hand-on-lab&Date)
+
+</div>

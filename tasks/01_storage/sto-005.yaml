@@ -1,0 +1,48 @@
+id: sto-005
+domain: storage
+title: Implement Dynamic Volume Provisioning
+description: |
+  Implement dynamic volume provisioning end-to-end:
+
+  1. Create a PVC named `dynamic-pvc` that uses the default StorageClass
+     (or a StorageClass named `standard` if using Minikube).
+     - Storage Request: 500Mi
+     - Access Mode: ReadWriteOnce
+     - Add the label `task: dynamic-provisioning`
+
+  2. Create a Pod that uses this dynamically provisioned PVC:
+     - **Name:** `pod-dynamic-pvc`
+     - **Image:** `nginx`
+     - **Mount the PVC at:** `/usr/share/nginx/html`
+
+  3. Verify that the PVC is bound and the pod is running:
+
+  ```
+  kubectl get pvc dynamic-pvc
+  kubectl get pod pod-dynamic-pvc
+  ```
+difficulty: medium
+time_estimate: 10min
+weight: 7
+tags:
+  - storageclass
+  - dynamic-provisioning
+  - persistentvolumeclaim
+  - pod
+hints:
+  - Dynamic provisioning means you do NOT create a PV manually. The StorageClass's provisioner handles that when the PVC is created.
+  - In Minikube, the default StorageClass is named `standard` with provisioner `k8s.io/minikube-hostpath`. Set `storageClassName: standard` on the PVC.
+  - Create the PVC first, wait for it to bind (the provisioner creates the PV automatically), then create the pod that references the PVC -- or create them together and let `WaitForFirstConsumer` handle binding.
+exam_tips:
+  - Dynamic vs. static provisioning is a key exam concept. Know when each is used and that dynamic provisioning requires a StorageClass with an active provisioner.
+  - If a PVC stays Pending with dynamic provisioning, check `kubectl get storageclass` to confirm a default exists and the provisioner is functional.
+  - You can use `kubectl get sc` to quickly list StorageClasses and identify the default one (marked with `(default)`).
+setup_script: 01_setup_storage_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pvc -l task=dynamic-provisioning -o jsonpath='{.items[0].spec.storageClassName}'"
+verify_expected: "standard"
+solution_files:
+  - 01_Storage/solutions/task5-dynamic-provisioning.yaml
+prerequisites:
+  - sto-001
+  - sto-004

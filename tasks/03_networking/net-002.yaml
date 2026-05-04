@@ -1,0 +1,22 @@
+id: "net-002"
+domain: "services-networking"
+title: "Create a Network Policy with Ingress and Egress Rules"
+description: |
+  Create a NetworkPolicy named db-policy in namespace networking that:
+  - Allows traffic to pods with label app=db only from pods with label app=web
+  - Allows egress traffic only to port 53 (DNS) and to the Kubernetes API server
+difficulty: "medium"
+time_estimate: "7min"
+weight: 8
+tags: ["network-policy", "ingress", "egress"]
+hints:
+  - "Use podSelector and ingress.from with labelSelector to restrict incoming traffic."
+  - "For egress, specify ports and to rules. DNS uses port 53 on both UDP and TCP."
+  - "The Kubernetes API server typically listens on port 443. Use an ipBlock or a to rule for the API server endpoint."
+exam_tips:
+  - "Network policies are namespace-scoped. Use namespaceSelector to reference pods in other namespaces."
+  - "An empty podSelector {} means all pods in the namespace are selected."
+verify_command: "kubectl get networkpolicy -n networking -o jsonpath='{.items[0].spec.podSelector.matchLabels.app}'"
+verify_expected: "backend"
+solution_files:
+  - "03_networking/task2-network-policy.yaml"

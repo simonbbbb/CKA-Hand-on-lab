@@ -1,0 +1,62 @@
+id: trb-012
+domain: troubleshooting
+title: "CNI Plugin Not Working - Fix Cross-Node Pod Networking"
+description: |
+  Pods on different nodes cannot communicate with each other. Cross-node pod-to-pod
+  traffic fails while pod-to-service and same-node pod communication works. The
+  candidate must diagnose the CNI plugin issue, fix the network configuration, and
+  restore cross-node pod connectivity.
+
+  Starting state:
+  - A two-node cluster (controlplane, worker01) with a CNI plugin (Weave/Flannel/Calico)
+    installed.
+  - One of the CNI plugin DaemonSet pods (e.g., weave-net or calico-node on worker01) is
+    in CrashLoopBackOff state.
+  - The CNI configuration file at /etc/cni/net.d/ on worker01 has an incorrect pod
+    network CIDR (e.g., 10.32.0.0/12 instead of the correct 10.244.0.0/16).
+  - Two test pods exist: 'test-pod-a' on controlplane and 'test-pod-b' on worker01.
+    Pinging from test-pod-a to test-pod-b's IP fails.
+
+  The candidate must:
+  1. Check pod status: kubectl get pods -n kube-system -o wide. Identify the CNI pod
+     in CrashLoopBackOff on worker01.
+  2. Get pod IPs of test pods: kubectl get pods -o wide.
+  3. Test cross-node connectivity: kubectl exec test-pod-a -- ping -c 3 <test-pod-b-ip>
+     (verify it fails).
+  4. Check the CrashLooping CNI pod logs: kubectl logs <cni-pod> -n kube-system.
+  5. SSH into worker01: ssh worker01.
+  6. Inspect the CNI configuration: cat /etc/cni/net.d/<cni-config-file>.
+  7. Identify the incorrect network CIDR range.
+  8. Fix the CIDR to match the cluster's pod network (e.g., 10.244.0.0/16).
+  9. Restart the CNI pod: kubectl delete pod <cni-pod> -n kube-system
+     (the DaemonSet will recreate it).
+  10. Wait for the CNI pod to be Running.
+  11. Re-test cross-node connectivity: kubectl exec test-pod-a -- ping -c 3 <test-pod-b-ip>.
+
+  Verification command:
+    kubectl exec test-pod-a -- ping -c 1 <test-pod-b-ip>
+  Expected result: Successful ping (exit code 0).
+difficulty: hard
+time_estimate: 14
+weight: 30
+tags:
+  - troubleshooting
+  - networking
+  - cni
+  - pod-networking
+  - daemonset
+  - cross-node
+hints:
+  - "Start with 'kubectl get pods -n kube-system -o wide' to see if any CNI plugin pods (weave, calico, flannel) are in a bad state. Note which node the failing pod is on."
+  - "SSH into the node with the failing CNI pod and check the CNI config in /etc/cni/net.d/. Compare the network CIDR range in the config with the cluster's actual pod CIDR (check with 'kubectl cluster-info dump | grep -i cidr' or look at the kubeadm config)."
+  - "After fixing the CNI config file, delete the CrashLooping CNI pod so the DaemonSet recreates it with the corrected configuration. Verify it starts Running, then test cross-node connectivity again."
+exam_tips:
+  - "CNI issues are among the hardest troubleshooting scenarios. Know the config file locations: /etc/cni/net.d/ for CNI configs, and know how to check cluster CIDR: 'kubectl cluster-info dump | grep -m1 cluster-cidr' or check /etc/kubernetes/manifests/kube-controller-manager.yaml for --cluster-cidr."
+  - "CNI plugins run as DaemonSets, so there's one pod per node. If a CNI pod is CrashLooping on one node, cross-node networking will fail but same-node networking may still work."
+  - "In the exam, don't spend too long on one question. If a networking issue is taking more than 10 minutes, flag it and come back. Sometimes the fastest fix is to re-install the CNI plugin."
+  - "Useful commands for network debugging: 'kubectl exec <pod> -- ip route', 'kubectl exec <pod> -- cat /etc/resolv.conf', and 'iptables -L -t nat' on the node."
+solution_files:
+  - trb-012-cni-fix.yaml
+  - trb-012-steps.md
+verify_command: "kubectl get pod -n kube-system -l k8s-app=calico-node -o jsonpath='{.items[0].status.phase}'"
+verify_expected: "Running"

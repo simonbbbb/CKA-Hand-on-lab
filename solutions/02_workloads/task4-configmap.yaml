@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  DATABASE_URL: mysql://db:3306/mydb
+  DEBUG_MODE: "true"

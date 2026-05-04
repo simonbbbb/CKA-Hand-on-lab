@@ -1,0 +1,21 @@
+id: "net-001"
+domain: "services-networking"
+title: "Create ClusterIP and NodePort Services"
+description: |
+  Create a Deployment with 3 replicas of nginx (name: web-deployment, namespace: networking).
+  Then create a ClusterIP Service named web-clusterip exposing port 80.
+  Then create a NodePort Service named web-nodeport exposing port 80 on NodePort 30080.
+difficulty: "easy"
+time_estimate: "5min"
+weight: 5
+tags: ["service", "clusterip", "nodeport"]
+hints:
+  - "Use kubectl create deployment and kubectl expose. ClusterIP is the default service type."
+  - "For NodePort with a specific port, use --node-port=30080 when exposing the deployment."
+  - "Make sure the namespace 'networking' exists before creating resources: kubectl create namespace networking."
+exam_tips:
+  - "Services are core CKA knowledge. Know all three types and when to use each."
+verify_command: "kubectl get service custom-service -n networking -o jsonpath='{.spec.type} {.spec.selector.app}'"
+verify_expected: "ClusterIP frontend"
+solution_files:
+  - "03_networking/task1-service.yaml"

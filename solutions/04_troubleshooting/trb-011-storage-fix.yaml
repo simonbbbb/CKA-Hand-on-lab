@@ -1,0 +1,35 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: rancher.io/local-path    # FIXED: was 'kubernetes.io/no-provisioner'
+parameters:
+  path: /opt/local-path-provisioner
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+---
+# Alternative: If no dynamic provisioner is available, create a PV manually.
+# Uncomment below if you need a static PV instead.
+#
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: local-pv
+# spec:
+#   capacity:
+#     storage: 1Gi
+#   volumeMode: Filesystem
+#   accessModes:
+#   - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Delete
+#   storageClassName: local-storage
+#   local:
+#     path: /mnt/data
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - controlplane

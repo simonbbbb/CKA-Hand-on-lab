@@ -1,0 +1,33 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: v1.25.0
+controlPlaneEndpoint: "control-plane.example.com:6443"
+networking:
+  podSubnet: "192.168.0.0/16"
+  serviceSubnet: "10.96.0.0/12"
+apiServer:
+  extraArgs:
+    enable-admission-plugins: "NodeRestriction,PodSecurityPolicy"
+    audit-log-path: "/var/log/kubernetes/audit.log"
+    audit-log-maxage: "30"
+etcd:
+  local:
+    dataDir: "/var/lib/etcd"
+scheduler:
+  extraArgs:
+    address: "0.0.0.0"
+controllerManager:
+  extraArgs:
+    address: "0.0.0.0"
+    cluster-signing-duration: "8760h0m0s"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "192.168.1.101"
+  bindPort: 6443
+nodeRegistration:
+  name: "master-1"
+  taints:
+  - key: "node-role.kubernetes.io/control-plane"
+    effect: "NoSchedule"

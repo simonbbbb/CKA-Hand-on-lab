@@ -1,0 +1,50 @@
+id: trb-010
+domain: troubleshooting
+title: "Failed Pod with ImagePullBackOff - Fix the Deployment"
+description: |
+  A deployment named 'web-frontend' in the 'production' namespace has pods stuck in
+  ImagePullBackOff state. The deployment was recently updated with a new image tag but
+  the rollout is failing. The candidate must diagnose the issue and fix the deployment
+  so the pods start successfully.
+
+  Starting state:
+  - Deployment 'web-frontend' exists in namespace 'production' with 3 replicas.
+  - All pods are in ImagePullBackOff state.
+  - The deployment references image 'nginx:lates' (a typo of 'nginx:latest').
+
+  The candidate must:
+  1. Check pod status: kubectl get pods -n production.
+  2. Describe a failing pod: kubectl describe pod <pod-name> -n production.
+  3. Identify the ImagePullBackOff error and the incorrect image tag.
+  4. Check the deployment: kubectl get deployment web-frontend -n production -o yaml.
+  5. Identify the typo in the image tag ('nginx:lates' instead of 'nginx:latest').
+  6. Fix the deployment image: kubectl set image deployment/web-frontend nginx=nginx:latest -n production
+     or kubectl edit deployment web-frontend -n production.
+  7. Monitor the rollout: kubectl rollout status deployment/web-frontend -n production.
+  8. Verify all pods are Running: kubectl get pods -n production.
+
+  Verification command:
+    kubectl get deployment web-frontend -n production -o jsonpath='{.status.readyReplicas}'
+  Expected result: "3"
+difficulty: medium
+time_estimate: 6
+weight: 30
+tags:
+  - troubleshooting
+  - pods
+  - deployment
+  - imagepullbackoff
+  - rollout
+hints:
+  - "Use 'kubectl describe pod <name> -n production' and look at the Events section at the bottom. It will tell you exactly why the image cannot be pulled."
+  - "Check the deployment's image specification with 'kubectl get deployment web-frontend -n production -o yaml' and look at spec.template.spec.containers[].image for any typos in the image name or tag."
+  - "Use 'kubectl set image deployment/<name> <container>=<image>:<tag> -n <ns>' to quickly fix the image without editing the full YAML. Then use 'kubectl rollout status' to watch the update."
+exam_tips:
+  - "ImagePullBackOff is one of the most common pod errors. Always check: 1) image name spelling, 2) tag existence, 3) private registry credentials (imagePullSecrets)."
+  - "In the exam, use 'kubectl set image' for quick fixes rather than 'kubectl edit' -- it's faster and less error-prone."
+  - "If a rollout is stuck, you can check rollout history with 'kubectl rollout history deployment/<name>' and rollback with 'kubectl rollout undo deployment/<name>' if needed."
+  - "Remember the -n flag for namespace-scoped resources. Forgetting it is a common source of confusion and wasted time."
+solution_files:
+  - trb-010-deployment-fix.yaml
+verify_command: "kubectl get deployment broken-deployment -n troubleshooting -o jsonpath='{.spec.template.spec.containers[0].image}'"
+verify_expected: "nginx"

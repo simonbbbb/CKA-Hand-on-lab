@@ -1,0 +1,22 @@
+id: "net-006"
+domain: "services-networking"
+title: "Modify CoreDNS for Custom Domain Resolution"
+description: |
+  Examine the CoreDNS ConfigMap (coredns in kube-system namespace) and modify it to add a custom
+  domain resolution. Add a rewrite rule that converts queries for *.internal to
+  *.default.svc.cluster.local.
+difficulty: "hard"
+time_estimate: "10min"
+weight: 10
+tags: ["dns", "coredns", "configmap"]
+hints:
+  - "The CoreDNS ConfigMap contains a Corefile. Add a rewrite clause to it."
+  - "Use kubectl edit configmap coredns -n kube-system to modify the Corefile."
+  - "The rewrite syntax is: rewrite name regex (.*)\\.internal$ {1}.default.svc.cluster.local."
+exam_tips:
+  - "CoreDNS is the default DNS server in Kubernetes. Know how to read and modify the Corefile."
+  - "After modifying CoreDNS, restart the pods: kubectl rollout restart deployment coredns -n kube-system."
+verify_command: "kubectl get configmap coredns-custom -n kube-system -o jsonpath='{.data}'"
+verify_expected: "."
+solution_files:
+  - "03_networking/task6-coredns-config.yaml"

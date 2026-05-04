@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app-routing
+  namespace: networking
+spec:
+  parentRefs:
+  - name: app-gateway
+    namespace: networking
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /app1
+    backendRefs:
+    - name: app1-svc
+      port: 80
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /app2
+    backendRefs:
+    - name: app2-svc
+      port: 80

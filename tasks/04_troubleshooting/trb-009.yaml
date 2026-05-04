@@ -1,0 +1,53 @@
+id: trb-009
+domain: troubleshooting
+title: "Kubelet Certificate Expiry - Recover a NotReady Worker Node"
+description: |
+  A worker node named 'worker01' has transitioned to NotReady status. Applications
+  running on that node are no longer accessible. The candidate must diagnose why the
+  node is NotReady, identify a kubelet certificate expiry issue, renew the certificates,
+  and bring the node back to Ready.
+
+  Starting state:
+  - Worker node 'worker01' shows status NotReady when running kubectl get nodes.
+  - The kubelet on worker01 has an expired client certificate and cannot authenticate
+    to the API server.
+  - All other nodes are healthy.
+
+  The candidate must:
+  1. Check node status: kubectl get nodes.
+  2. Get more details: kubectl describe node worker01 (check conditions and messages).
+  3. SSH into worker01: ssh worker01.
+  4. Check kubelet logs: journalctl -u kubelet -n 50.
+  5. Identify the certificate expiry error message (e.g., "x509: certificate has expired
+     or is not yet valid" or "failed to rotate client certificates").
+  6. Check certificate expiration: kubeadm certs check-expiration.
+  7. Renew the expired certificates: sudo kubeadm certs renew all.
+  8. Restart the kubelet: sudo systemctl restart kubelet.
+  9. Exit SSH and verify the node returns to Ready: kubectl get nodes.
+
+  Verification command:
+    kubectl get node worker01 -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+  Expected result: "True"
+difficulty: hard
+time_estimate: 10
+weight: 30
+tags:
+  - troubleshooting
+  - kubelet
+  - certificates
+  - kubeadm
+  - node-status
+  - x509
+hints:
+  - "Start with 'kubectl get nodes' to see which node is NotReady, then 'kubectl describe node <name>' to see conditions and events that may explain why."
+  - "SSH into the affected node and run 'journalctl -u kubelet -n 50' to see recent kubelet logs. Look for x509 or certificate-related error messages."
+  - "Use 'kubeadm certs check-expiration' to see which certificates have expired, then 'kubeadm certs renew all' to renew them. Don't forget to restart kubelet with 'systemctl restart kubelet' after renewal."
+exam_tips:
+  - "Certificate-related issues are a common CKA topic. Memorize the kubeadm certificate renewal workflow: check, renew, restart kubelet."
+  - "In a real cluster, you might also need to update kubeconfig files after cert renewal. Use 'cp /etc/kubernetes/admin.conf ~/.kube/config' on the control plane if kubectl commands fail after renewal."
+  - "The 'kubeadm certs renew' command can renew individual certificates (e.g., 'kubeadm certs renew apiserver') or all at once with 'kubeadm certs renew all'."
+  - "Always verify with 'kubectl get nodes' after the fix. If the node is still NotReady, check kubelet logs again for any remaining errors."
+solution_files:
+  - trb-009-kubelet-cert-fix.md
+verify_command: "kubectl get nodes -o jsonpath='{.items[0].status.conditions[?(@.type==\"Ready\")].status}'"
+verify_expected: "True"

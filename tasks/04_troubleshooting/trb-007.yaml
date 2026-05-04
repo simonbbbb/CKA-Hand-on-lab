@@ -1,0 +1,20 @@
+id: "trb-007"
+domain: "troubleshooting"
+title: "Troubleshoot DNS Resolution in a Pod"
+description: |
+  Pods in namespace troubleshooting cannot resolve service names via DNS. Check the CoreDNS pods,
+  verify the kube-dns service exists, and check pod DNS configuration. Fix any issues found.
+difficulty: "hard"
+time_estimate: "8min"
+weight: 10
+tags: ["dns", "coredns", "networking"]
+hints:
+  - "Check kubectl get pods -n kube-system -l k8s-app=kube-dns."
+  - "Test DNS from inside a pod with nslookup or dig."
+  - "Check /etc/resolv.conf in the pod for correct nameserver configuration."
+exam_tips:
+  - "DNS issues are common in CKA. Know how to test DNS from inside pods and check CoreDNS status."
+solution_files:
+  - "04_troubleshooting/task7-dns-resolution.yaml"
+verify_command: "kubectl get pod dns-checker -n troubleshooting -o jsonpath='{.status.phase}'"
+verify_expected: "Running"

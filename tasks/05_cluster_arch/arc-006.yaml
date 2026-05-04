@@ -1,0 +1,43 @@
+id: arc-006
+domain: cluster-architecture
+title: Prepare Helm Chart Values File
+description: |
+  Create a Helm values file for deploying a web application.
+
+  **Specifications:**
+  Create a `values.yaml` file with the following configuration:
+
+  - **Replica count:** 2
+  - **Image:** repository: nginx, tag: 1.21.0, pullPolicy: IfNotPresent
+  - **Service:** type ClusterIP, port 80
+  - **Resources:** limits CPU 100m / memory 128Mi, requests CPU 50m / memory 64Mi
+  - **Autoscaling:** enabled, min 1, max 5, target CPU 80%
+  - **Ingress:** disabled
+  - **Security context:** runAsNonRoot true, runAsUser 1000
+  - **Liveness probe:** HTTP GET on / port http, initial delay 30s, period 10s
+  - **Readiness probe:** HTTP GET on / port http, initial delay 5s, period 5s
+
+  The file should be valid YAML and follow standard Helm values conventions.
+difficulty: medium
+time_estimate: 10min
+weight: 6
+tags:
+  - helm
+  - values
+  - chart
+  - deployment-config
+hints:
+  - "Helm values files are plain YAML. Use nested structures matching the convention: image.repository, image.tag, service.type, etc."
+  - "Resource requests/limits use the pattern resources.limits.cpu, resources.limits.memory, resources.requests.cpu, resources.requests.memory."
+  - "Probes follow the pattern livenessProbe.httpGet.path, livenessProbe.httpGet.port, livenessProbe.initialDelaySeconds, etc."
+exam_tips:
+  - "Helm values files are not Kubernetes manifests -- they are plain YAML consumed by Helm templates. Do not include apiVersion or kind."
+  - "Know the basic Helm commands: helm install, helm upgrade, helm rollback, helm list, helm repo add."
+  - "On the exam, you may need to customize a chart values and deploy it. Use helm install <release> <chart> -f values.yaml."
+setup_script: 05_setup_cluster_arch_lab.sh
+verify_script: verify_solutions.sh
+verify_command: ""
+verify_expected: ""
+solution_files:
+  - 05_Cluster_Architecture/solutions/task6-helm-chart.yaml
+prerequisites: []

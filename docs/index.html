@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKA Lab - Hands-On Kubernetes Administrator Exam Prep</title>
+    <meta name="description" content="The definitive hands-on CKA exam prep platform with 55+ exam-style tasks, exam simulator, and auto-verification">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts - JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#0a0a0f',
+                        surface: '#12121a',
+                        surface2: '#1a1a25',
+                        primary: '#00ff88',
+                        secondary: '#00d4ff',
+                        accent: '#7c3aed',
+                        muted: '#4a5568',
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    animation: {
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'glow-slow': 'glow 3s ease-in-out infinite alternate',
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                        'typing': 'typing 3s steps(40) forwards',
+                        'blink': 'blink 1s step-end infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { textShadow: '0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.3)' },
+                            '100%': { textShadow: '0 0 30px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.5)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        typing: {
+                            '0%': { width: '0' },
+                            '100%': { width: '100%' },
+                        },
+                        blink: {
+                            '0%, 50%': { opacity: '1' },
+                            '51%, 100%': { opacity: '0' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #e2e8f0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a25;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ff88;
+        }
+
+        /* Glowing Border Effect */
+        .glow-border {
+            position: relative;
+            background: #12121a;
+            border-radius: 12px;
+        }
+
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, #00ff88, #00d4ff, #7c3aed);
+            border-radius: 14px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-border:hover::before {
+            opacity: 1;
+        }
+
+        /* Terminal Window */
+        .terminal {
+            background: #0a0a0f;
+            border: 1px solid #1a1a25;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #1a1a25;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #252532;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        /* Terminal Typing Animation */
+        .terminal-line {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 1s steps(40) forwards;
+        }
+
+        .terminal-line:nth-child(1) { animation-delay: 0.5s; }
+        .terminal-line:nth-child(2) { animation-delay: 1.5s; }
+        .terminal-line:nth-child(3) { animation-delay: 2.5s; }
+        .terminal-line:nth-child(4) { animation-delay: 3.5s; }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #00ff88;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        /* Card Hover Effect */
+        .feature-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #12121a 0%, #1a1a25 100%);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1);
+        }
+
+        /* Domain Card Progress */
+        .progress-bar {
+            height: 6px;
+            background: #1a1a25;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #1a1a25;
+            border: 1px solid #252532;
+            border-radius: 20px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: #0a0a0f;
+            font-weight: 600;
+            padding: 14px 32px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00ff88;
+            font-weight: 600;
+            padding: 14px 32px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid #00ff88;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #1a1a25, transparent);
+            margin: 80px 0;
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Screenshot Placeholder */
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #12121a 0%, #1a1a25 100%);
+            border: 2px dashed #252532;
+            border-radius: 12px;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .screenshot-placeholder:hover {
+            border-color: #00ff88;
+            background: linear-gradient(135deg, #1a1a25 0%, #252532 100%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-surface2">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center font-bold text-background">
+                        C
+                    </div>
+                    <span class="font-bold text-lg">CKA Lab</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-muted hover:text-primary transition-colors">Features</a>
+                    <a href="#domains" class="text-muted hover:text-primary transition-colors">Domains</a>
+                    <a href="#quickstart" class="text-muted hover:text-primary transition-colors">Quick Start</a>
+                    <a href="https://github.com/simonbbbb/CKA-Hand-on-lab" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-primary transition-colors">GitHub</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-muted hover:text-primary">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-surface border-t border-surface2">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#features" class="block text-muted hover:text-primary transition-colors">Features</a>
+                <a href="#domains" class="block text-muted hover:text-primary transition-colors">Domains</a>
+                <a href="#quickstart" class="block text-muted hover:text-primary transition-colors">Quick Start</a>
+                <a href="https://github.com/simonbbbb/CKA-Hand-on-lab" target="_blank" rel="noopener noreferrer" class="block text-muted hover:text-primary transition-colors">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center pt-16 relative overflow-hidden">
+        <!-- Background Effects -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float-delayed"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center">
+                <!-- Badges -->
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <div class="badge">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <span>Open Source</span>
+                    </div>
+                    <div class="badge">
+                        <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9H5v2h2v-2zm8 0h-2v2h2v-2zM9 9h2v2H9V9z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Rust</span>
+                    </div>
+                    <div class="badge">
+                        <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>MIT License</span>
+                    </div>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4 tracking-tight" style="color: #00ff88;">
+                    CKA Exam Simulator
+                </h1>
+
+                <p class="text-lg sm:text-xl text-muted mb-8 max-w-2xl mx-auto font-light">
+                    by <span style="color: #00d4ff; font-weight: 600;">simonbbbb</span>
+                </p>
+
+                <!-- Terminal Animation -->
+                <div class="terminal max-w-2xl mx-auto mb-12">
+                    <div class="terminal-header">
+                        <div class="terminal-dot red"></div>
+                        <div class="terminal-dot yellow"></div>
+                        <div class="terminal-dot green"></div>
+                        <span class="ml-auto text-sm text-muted">cka-lab</span>
+                    </div>
+                    <div class="terminal-body text-left">
+                        <div class="terminal-line" style="color: #00ff88;">$ cka-lab</div>
+                        <div class="terminal-line" style="color: #00d4ff;">Loading CKA Lab v2.0...</div>
+                        <div class="terminal-line" style="color: #e2e8f0;">Found 55 tasks across 5 domains</div>
+                        <div class="terminal-line" style="color: #00ff88;">Ready. Good luck! 🚀</div>
+                        <span class="cursor"></span>
+                    </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                    <a href="#quickstart" class="btn-primary">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Get Started
+                    </a>
+                    <a href="https://github.com/simonbbbb/CKA-Hand-on-lab" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        View on GitHub
+                    </a>
+                </div>
+
+                <!-- Scroll Indicator -->
+                <div class="animate-bounce">
+                    <svg class="w-6 h-6 mx-auto text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl font-bold mb-4">
+                    <span class="gradient-text">Powerful Features</span>
+                </h2>
+                <p class="text-xl text-muted max-w-2xl mx-auto">
+                    Everything you need to ace the CKA exam
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="feature-card glow-border p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">50+ Hands-On Tasks</h3>
+                    <p class="text-muted">Realistic exam scenarios covering all 5 CKA domains with practical challenges</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card glow-border p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Exam Simulator</h3>
+                    <p class="text-muted">Timed 2-hour practice mode that mimics the real exam environment perfectly</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card glow-border p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Auto-Verification</h3>
+                    <p class="text-muted">Instant feedback on your solutions so you know exactly what needs improvement</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card glow-border p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Progressive Hints</h3>
+                    <p class="text-muted">3-level hint system to guide you when you're stuck without giving away answers</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card glow-border p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Beautiful TUI</h3>
+                    <p class="text-muted">Built with Rust + Ratatui for the best terminal experience you've ever had</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card glow-border p-8 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Any Cluster</h3>
+                    <p class="text-muted">Works with minikube, kind, k3s, or any cloud-based Kubernetes cluster</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Domains Section -->
+    <section id="domains" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl font-bold mb-4">
+                    <span class="gradient-text">CKA Exam Domains</span>
+                </h2>
+                <p class="text-xl text-muted max-w-2xl mx-auto">
+                    Comprehensive coverage of all exam objectives
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Domain 1: Storage -->
+                <div class="feature-card p-8 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">Storage</h3>
+                        <span class="text-sm text-muted">10%</span>
+                    </div>
+                    <p class="text-muted mb-4">5 tasks covering persistent volumes, storage classes, and stateful applications</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-2 text-sm text-muted">
+                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        5/5 tasks ready
+                    </div>
+                </div>
+
+                <!-- Domain 2: Workloads -->
+                <div class="feature-card p-8 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">Workloads & Scheduling</h3>
+                        <span class="text-sm text-muted">15%</span>
+                    </div>
+                    <p class="text-muted mb-4">9 tasks on deployments, pods, controllers, and scheduling strategies</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-2 text-sm text-muted">
+                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        9/9 tasks ready
+                    </div>
+                </div>
+
+                <!-- Domain 3: Networking -->
+                <div class="feature-card p-8 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">Services & Networking</h3>
+                        <span class="text-sm text-muted">20%</span>
+                    </div>
+                    <p class="text-muted mb-4">12 tasks covering services, ingress, network policies, and core DNS</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-2 text-sm text-muted">
+                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        12/12 tasks ready
+                    </div>
+                </div>
+
+                <!-- Domain 4: Troubleshooting -->
+                <div class="feature-card p-8 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">Troubleshooting</h3>
+                        <span class="text-sm text-muted">30%</span>
+                    </div>
+                    <p class="text-muted mb-4">12 tasks debugging applications, nodes, networks, and cluster components</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-2 text-sm text-muted">
+                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        12/12 tasks ready
+                    </div>
+                </div>
+
+                <!-- Domain 5: Architecture -->
+                <div class="feature-card p-8 rounded-xl md:col-span-2 lg:col-span-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">Cluster Architecture</h3>
+                        <span class="text-sm text-muted">25%</span>
+                    </div>
+                    <p class="text-muted mb-4">9 tasks on cluster setup, security, RBAC, and maintenance</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-4 flex items-center gap-2 text-sm text-muted">
+                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        9/9 tasks ready
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Quick Start Section -->
+    <section id="quickstart" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl font-bold mb-4">
+                    <span class="gradient-text">Quick Start</span>
+                </h2>
+                <p class="text-xl text-muted max-w-2xl mx-auto">
+                    Get up and running in under 5 minutes
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Step 1 -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center font-bold text-background text-sm">
+                            1
+                        </div>
+                        <h3 class="text-xl font-bold">Clone the Repository</h3>
+                    </div>
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dot red"></div>
+                            <div class="terminal-dot yellow"></div>
+                            <div class="terminal-dot green"></div>
+                            <span class="ml-auto text-sm text-muted">bash</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div style="color: #00ff88;">$</div>
+                            <div style="color: #e2e8f0;">git clone https://github.com/simonbbbb/CKA-Hand-on-lab.git</div>
+                            <div style="color: #00ff88;">$</div>
+                            <div style="color: #e2e8f0;">cd CKA-Hand-on-lab</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center font-bold text-background text-sm">
+                            2
+                        </div>
+                        <h3 class="text-xl font-bold">Start the TUI</h3>
+                    </div>
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dot red"></div>
+                            <div class="terminal-dot yellow"></div>
+                            <div class="terminal-dot green"></div>
+                            <span class="ml-auto text-sm text-muted">bash</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div style="color: #00ff88;">$</div>
+                            <div style="color: #e2e8f0;">cargo run --release</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center font-bold text-background text-sm">
+                            3
+                        </div>
+                        <h3 class="text-xl font-bold">Or Set Up Manually</h3>
+                    </div>
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dot red"></div>
+                            <div class="terminal-dot yellow"></div>
+                            <div class="terminal-dot green"></div>
+                            <span class="ml-auto text-sm text-muted">bash</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div style="color: #00ff88;">$</div>
+                            <div style="color: #e2e8f0;">cd setup</div>
+                            <div style="color: #00ff88;">$</div>
+                            <div style="color: #e2e8f0;">./lab_launcher.sh</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prerequisites -->
+            <div class="mt-12 p-6 bg-surface rounded-xl border border-surface2">
+                <h4 class="font-bold mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Prerequisites
+                </h4>
+                <ul class="text-muted space-y-2 text-sm">
+                    <li>• Rust toolchain (for TUI) - or use pre-built binaries</li>
+                    <li>• kubectl configured and pointing to your cluster</li>
+                    <li>• A Kubernetes cluster (minikube, kind, k3s, or cloud)</li>
+                    <li>• Basic familiarity with Kubernetes concepts</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Screenshots Section -->
+    <section id="screenshots" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl font-bold mb-4">
+                    <span class="gradient-text">Interface Preview</span>
+                </h2>
+                <p class="text-xl text-muted max-w-2xl mx-auto">
+                    A beautiful terminal UI built for productivity
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Screenshot 1 -->
+                <div class="screenshot-placeholder">
+                    <div class="text-center p-8">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-lg font-semibold mb-2">Main Dashboard</p>
+                        <p class="text-muted text-sm">Screenshot Coming Soon</p>
+                    </div>
+                </div>
+
+                <!-- Screenshot 2 -->
+                <div class="screenshot-placeholder">
+                    <div class="text-center p-8">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p class="text-lg font-semibold mb-2">Task View</p>
+                        <p class="text-muted text-sm">Screenshot Coming Soon</p>
+                    </div>
+                </div>
+
+                <!-- Screenshot 3 -->
+                <div class="screenshot-placeholder">
+                    <div class="text-center p-8">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-lg font-semibold mb-2">Exam Simulator</p>
+                        <p class="text-muted text-sm">Screenshot Coming Soon</p>
+                    </div>
+                </div>
+
+                <!-- Screenshot 4 -->
+                <div class="screenshot-placeholder">
+                    <div class="text-center p-8">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-lg font-semibold mb-2">Hint System</p>
+                        <p class="text-muted text-sm">Screenshot Coming Soon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-surface2">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Brand -->
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center font-bold text-background">
+                            C
+                        </div>
+                        <span class="font-bold text-lg">CKA Lab</span>
+                    </div>
+                    <p class="text-muted text-sm">
+                        The definitive hands-on CKA exam prep platform. Build your Kubernetes expertise with real-world scenarios.
+                    </p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold mb-4">Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li>
+                            <a href="#features" class="text-muted hover:text-primary transition-colors">Features</a>
+                        </li>
+                        <li>
+                            <a href="#domains" class="text-muted hover:text-primary transition-colors">Domains</a>
+                        </li>
+                        <li>
+                            <a href="#quickstart" class="text-muted hover:text-primary transition-colors">Quick Start</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/simonbbbb/CKA-Hand-on-lab" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-primary transition-colors">GitHub</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <h4 class="font-bold mb-4">Connect</h4>
+                    <div class="flex gap-4">
+                        <a href="https://github.com/simonbbbb/CKA-Hand-on-lab" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-primary transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <p class="text-muted text-sm mt-4">
+                        Built with ❤️ by the community
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-surface2 text-center text-sm text-muted">
+                <p>© 2024 CKA Lab. Open source under MIT License.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking on a link
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar background on scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-background/95');
+            } else {
+                nav.classList.remove('bg-background/95');
+            }
+        });
+    </script>
+</body>
+</html>

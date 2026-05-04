@@ -1,0 +1,40 @@
+id: sto-002
+domain: storage
+title: Create a Persistent Volume
+description: |
+  Create a Persistent Volume with the following specifications:
+
+  - **Name:** `pv-manual`
+  - **Storage Capacity:** 1Gi
+  - **Access Mode:** ReadWriteOnce
+  - **Host Path:** `/mnt/data`
+  - **StorageClass:** `manual`
+  - **Reclaim Policy:** Retain
+
+  Verify your PV is created and available:
+
+  ```
+  kubectl get pv pv-manual
+  ```
+difficulty: easy
+time_estimate: 5min
+weight: 5
+tags:
+  - persistentvolume
+  - storage
+  - hostpath
+hints:
+  - "PersistentVolumes are cluster-scoped resources (no namespace needed). Use apiVersion: v1 and kind: PersistentVolume."
+  - "Under spec, set capacity.storage, accessModes, storageClassName, persistentVolumeReclaimPolicy, and hostPath.path."
+  - "The reclaim policy should be Retain. The hostPath section uses path: /mnt/data and the storageClassName is manual."
+exam_tips:
+  - "PVs are not namespaced. If your command fails with a namespace error, omit the -n flag."
+  - "On the exam, pay attention to the exact access mode strings: ReadWriteOnce, ReadOnlyMany, ReadWriteMany -- they are case-sensitive."
+  - "Use kubectl explain pv.spec to quickly check available fields during the exam."
+setup_script: 01_setup_storage_lab.sh
+verify_script: verify_solutions.sh
+verify_command: "kubectl get pv pv-manual -o jsonpath='{.spec.capacity.storage} {.spec.accessModes[0]} {.spec.hostPath.path} {.spec.storageClassName}'"
+verify_expected: "1Gi ReadWriteOnce /mnt/data manual"
+solution_files:
+  - 01_Storage/solutions/task2-persistent-volume.yaml
+prerequisites: []

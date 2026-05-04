@@ -1,0 +1,21 @@
+[package]
+name = "cka-lab"
+version = "2.0.0"
+edition = "2021"
+description = "The definitive hands-on CKA exam prep platform"
+authors = ["Simon Balazs"]
+license = "MIT"
+
+[dependencies]
+ratatui = "0.29"
+crossterm = "0.28"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+tokio = { version = "1", features = ["full"] }
+walkdir = "2"
+chrono = "0.4"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0.149"

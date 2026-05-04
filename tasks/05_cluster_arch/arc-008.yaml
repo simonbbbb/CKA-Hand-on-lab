@@ -1,0 +1,62 @@
+id: arc-008
+domain: "Cluster Architecture, Installation & Configuration"
+title: "Enforce Pod Security Standards via Namespace Labels"
+description: |
+  Configure the namespace `restricted-ns` with Pod Security Standards (PSS) using
+  namespace labels.
+
+  Requirements:
+  1. Create the namespace `restricted-ns` if it does not already exist.
+  2. Add the following labels to the namespace:
+     - Enforce the "restricted" profile: `pod-security.kubernetes.io/enforce: restricted`
+     - Audit on "baseline" profile: `pod-security.kubernetes.io/audit: baseline`
+     - Warn on "baseline" profile: `pod-security.kubernetes.io/warn: baseline`
+  3. Also set the enforce version to the latest available: `pod-security.kubernetes.io/enforce-version: latest`
+
+  Background:
+  Pod Security Standards replaced Pod Security Policies (PSPs) which were removed
+  in Kubernetes v1.25. PSS is configured via namespace labels, not via admission
+  webhook resources.
+
+  Verification:
+    kubectl get namespace restricted-ns -o yaml
+    kubectl label namespace restricted-ns --list
+    # Try to create a pod running as root — it should be blocked:
+    kubectl run test-root --image=nginx --restart=Never -n restricted-ns
+difficulty: medium
+time_estimate: 4
+weight: 4
+tags:
+  - pod-security
+  - pss
+  - namespace-labels
+  - security-profiles
+  - restricted
+hints:
+  - hint: "Pod Security Standards are configured via namespace labels, not via a separate resource kind."
+    level: 1
+  - hint: "Use kubectl label namespace restricted-ns pod-security.kubernetes.io/enforce=restricted (and similarly for audit and warn)."
+    level: 2
+  - hint: |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: restricted-ns
+        labels:
+          pod-security.kubernetes.io/enforce: restricted
+          pod-security.kubernetes.io/enforce-version: latest
+          pod-security.kubernetes.io/audit: baseline
+          pod-security.kubernetes.io/warn: baseline
+    level: 3
+exam_tips: |
+  - PSS has three profiles: privileged, baseline, restricted (in order of strictness).
+  - Three modes: enforce (blocks), audit (logs event), warn (shows warning but allows).
+  - All configured via labels on the namespace — there is no separate CRD or API resource.
+  - Label prefix: pod-security.kubernetes.io/<mode>: <profile>
+  - Version label: pod-security.kubernetes.io/<mode>-version: v1.35 (or "latest")
+  - PSPs (PodSecurityPolicy) were removed in v1.25 — do NOT use them.
+solution_files:
+  - solutions/05_cluster_arch/arc-008-namespace-psp.yaml
+verify_script: verify_solutions.sh
+verify_command: "kubectl get ns restricted-ns -o jsonpath='{.metadata.labels}'"
+verify_expected: "pod-security"

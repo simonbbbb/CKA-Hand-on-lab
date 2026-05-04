@@ -1,0 +1,20 @@
+id: "trb-002"
+domain: "troubleshooting"
+title: "Fix a Pod with Insufficient Resources"
+description: |
+  Examine the resource-constrained-pod in namespace troubleshooting. It's failing due to
+  memory/CPU limits being too restrictive. Increase memory limit to 256Mi and CPU limit to 500m.
+difficulty: "easy"
+time_estimate: "5min"
+weight: 5
+tags: ["pod", "resources", "limits"]
+hints:
+  - "kubectl describe pod will show OOMKilled or resource limits causing issues."
+  - "Edit the pod's resource requests/limits to increase them."
+  - "Memory should be 256Mi and CPU should be 500m for the limits."
+exam_tips:
+  - "Know the difference between requests and limits. Pods can be Pending if requests exceed node capacity."
+solution_files:
+  - "04_troubleshooting/task2-resource-constrained-fix.yaml"
+verify_command: "kubectl get pod resource-constrained-pod -n troubleshooting -o jsonpath='{.status.phase}'"
+verify_expected: "Running"
