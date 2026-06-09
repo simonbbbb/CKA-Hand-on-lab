@@ -8,7 +8,6 @@ description: |
      (or a StorageClass named `standard` if using Minikube).
      - Storage Request: 500Mi
      - Access Mode: ReadWriteOnce
-     - Add the label `task: dynamic-provisioning`
 
   2. Create a Pod that uses this dynamically provisioned PVC:
      - **Name:** `pod-dynamic-pvc`
@@ -39,7 +38,7 @@ exam_tips:
   - You can use `kubectl get sc` to quickly list StorageClasses and identify the default one (marked with `(default)`).
 setup_script: 01_setup_storage_lab.sh
 verify_script: verify_solutions.sh
-verify_command: "kubectl get pvc -l task=dynamic-provisioning -o jsonpath='{.items[0].spec.storageClassName}'"
+verify_command: "kubectl get pvc dynamic-pvc -o jsonpath='{.spec.storageClassName}'"
 verify_expected: "standard"
 solution_files:
   - 01_Storage/solutions/task5-dynamic-provisioning.yaml

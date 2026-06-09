@@ -127,7 +127,7 @@ verify_storage() {
   verify "Storage" "4" "kubectl get pod pod-with-pvc -o jsonpath='{.spec.containers[0].image}{\" \"}{.spec.volumes[0].persistentVolumeClaim.claimName}'" "nginx pvc-manual" "exact"
   
   # Task 5: Implement Dynamic Volume Provisioning
-  verify "Storage" "5" "kubectl get pvc -l task=dynamic-provisioning -o jsonpath='{.items[0].spec.storageClassName}'" "standard" "contains"
+  verify "Storage" "5" "kubectl get pvc dynamic-pvc -o jsonpath='{.spec.storageClassName}'" "standard" "contains"
   
   # Display summary for this section
   display_summary

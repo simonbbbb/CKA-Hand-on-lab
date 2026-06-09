@@ -3,6 +3,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use serde::Deserialize;
+use serde_yaml::Value;
 
 use super::{Difficulty, Domain, Task};
 
@@ -14,6 +15,101 @@ const DOMAIN_MAP: &[(&str, &str, &str, u8)] = &[
     ("04_troubleshooting", "troubleshooting", "Troubleshooting", 30),
     ("05_cluster_arch", "cluster-architecture", "Cluster Architecture", 25),
 ];
+
+// ── Custom deserializers for flexible YAML field formats ──────────────
+
+/// Deserialize `hints` accepting: null, a single string, a list of strings,
+/// a list of maps (structured `{hint, level}`), or maps caused by
+/// unquoted `colon: space` in a plain scalar.
+fn deserialize_hints<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value = Value::deserialize(deserializer).unwrap_or(Value::Null);
+    Ok(strings_from_value(value))
+}
+
+/// Deserialize `exam_tips` accepting: null, a list of strings, or a block
+/// scalar (`|`) — split the block scalar into individual items by `- ` lines.
+fn deserialize_exam_tips<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value = Value::deserialize(deserializer).unwrap_or(Value::Null);
+    match value {
+        Value::Sequence(seq) => Ok(strings_from_value(Value::Sequence(seq))),
+        Value::String(s) => Ok(parse_block_scalar_list(&s)),
+        _ => Ok(Vec::new()),
+    }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+
+/// Convert a YAML Value into `Vec<String>`, handling sequences, single
+/// strings, and mappings (structured hints or colon-in-scalar artifacts).
+fn strings_from_value(value: Value) -> Vec<String> {
+    match value {
+        Value::Sequence(seq) => seq.into_iter().map(string_from_item).collect(),
+        Value::String(s) => vec![s],
+        _ => Vec::new(),
+    }
+}
+
+/// Extract a string from a YAML value: strings pass through, mappings
+/// are either unwrapped from a `hint` key or reconstructed as `k: v` pairs.
+fn string_from_item(item: Value) -> String {
+    match item {
+        Value::String(s) => s,
+        Value::Mapping(map) => {
+            // Prefer extracting a "hint" key (structured {hint, level} format)
+            if let Some(hint) = map.iter().find_map(|(k, v)| {
+                if k.as_str() == Some("hint") {
+                    v.as_str().map(String::from)
+                } else {
+                    None
+                }
+            }) {
+                return hint;
+            }
+            // Otherwise reconstruct "k: v" pairs (colon-in-scalar artifact)
+            map.iter()
+                .map(|(k, v)| {
+                    let k = k.as_str().unwrap_or("");
+                    let v = v.as_str().unwrap_or("");
+                    format!("{}: {}", k, v)
+                })
+                .collect::<Vec<_>>()
+                .join(" ")
+        }
+        other => other.to_string(),
+    }
+}
+
+/// Parse a block scalar string containing a list of `- ` prefixed items,
+/// handling wrapped continuation lines.
+fn parse_block_scalar_list(s: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut current = String::new();
+    for line in s.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if let Some(content) = trimmed.strip_prefix("- ") {
+            if !current.is_empty() {
+                result.push(current);
+            }
+            current = content.to_string();
+        } else if !current.is_empty() {
+            current.push(' ');
+            current.push_str(trimmed);
+        }
+    }
+    if !current.is_empty() {
+        result.push(current);
+    }
+    result
+}
 
 /// Intermediate struct for deserialising YAML task definitions.
 #[derive(Debug, Deserialize)]
@@ -28,9 +124,11 @@ struct YamlTask {
     weight: u8,
     #[serde(default)]
     tags: Vec<String>,
-    #[serde(default)]
+    #[serde(default, alias = "Hints")]
+    #[serde(deserialize_with = "deserialize_hints")]
     hints: Vec<String>,
     #[serde(default)]
+    #[serde(deserialize_with = "deserialize_exam_tips")]
     exam_tips: Vec<String>,
     #[serde(default)]
     solution_files: Vec<String>,
